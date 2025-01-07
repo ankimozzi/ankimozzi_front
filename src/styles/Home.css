@@ -1,0 +1,138 @@
+/* Home.css */
+
+.home-container {
+  font-family: Inter, sans-serif;
+  padding: 20px;
+}
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.home-header h1 {
+  font-size: 2rem;
+}
+
+/* 카테고리 네비게이션 */
+.categories-nav {
+  display: flex;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  gap: 15px;
+  margin-bottom: 30px; /* 덱 리스트와의 간격 */
+}
+
+/* 기본 텍스트 버튼 */
+.category-link {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4255ff; /* 디폴트 색상 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s;
+  text-decoration: none; /* 기본적으로 언더라인 제거 */
+  position: relative; /* ::after를 위한 기준 위치 */
+}
+
+/* 호버 상태 */
+.category-link:hover {
+  color: #222fa1; /* 호버 색상 */
+}
+
+/* 클릭 상태 (변화 없음) */
+.category-link:active {
+  color: #222fa1; /* 클릭 시 동일 색상 유지 */
+}
+.category-link.active {
+  font-weight: 600; /* 클릭 시 기존 폰트 유지 */
+  text-decoration: none; /* 언더라인 없음 */
+}
+/* 선택된 상태의 아래 직사각형 바 */
+.category-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -8px; /* 텍스트 아래 여백 */
+  left: 0;
+  width: 100%; /* 버튼 너비에 맞춤 */
+  height: 4px; /* 직사각형 높이 */
+  background-color: #4255ff; /* 직사각형 색상 */
+  border-radius: 0px; /* 직사각형 모서리 둥글게 */
+}
+/* 덱 리스트 */
+.deck-list {
+  background-color: #f6f7fb;
+  padding: 20px;
+  margin: 0 -20px; /* 좌우 여백 제거 */
+  min-height: calc(100vh - 250px); /* 하단까지 배경 확장 */
+  box-sizing: border-box;
+  position: relative; /* No decks 중앙 정렬을 위해 기준 설정 */
+}
+
+/* 덱 리스트 그리드 */
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3열 레이아웃 */
+  gap: 20px;
+}
+
+/* 카드 디자인 (디폴트) */
+.deck-card {
+  background-color: #ffffff;
+  border: 2px solid #edeff5;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: left;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+/* 호버 상태 */
+.deck-card:hover {
+  border-color: #a0aaff;
+  background-color: #ffffff;
+}
+
+/* 온클릭 상태 */
+.deck-card:active {
+  border-color: #4255ff;
+  background-color: #ffffff;
+}
+
+/* 카드 텍스트 */
+.deck-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+/* No decks 문구 */
+.no-decks {
+  position: absolute; /* 독립적인 위치 설정 */
+  top: 50%; /* 컨테이너의 50% 지점 */
+  left: 50%; /* 컨테이너의 50% 지점 */
+  transform: translate(-50%, -50%); /* 중앙으로 정렬 */
+  font-size: 1.2rem;
+  color: #888;
+  text-align: center;
+  pointer-events: none; /* 클릭 방지 */
+}
+
+.generate-deck-btn {
+  padding: 10px 20px;
+  background-color: #4255ff;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.generate-deck-btn:hover {
+  background-color: #222fa1;
+}
