@@ -10,6 +10,38 @@ data "aws_vpc" "selected_vpc" {
   }
 }
 
+# 기존 VPC의 서브넷 가져오기
+data "aws_subnet_ids" "selected_subnets" {
+  vpc_id = data.aws_vpc.selected_vpc.id
+}
+
+data "aws_subnet" "subnets" {
+  for_each = toset(data.aws_subnet_ids.selected_subnets.ids)
+  id       = each.value
+}
+
+# EKS 클러스터 생성
+module "eks" {
+  source          = "terraform-aws-modules/eks/aws"
+  cluster_name    = "ankimozzi-cluster"
+  cluster_version = "1.24"
+  vpc_id          = data.aws_vpc.selected_vpc.id
+  subnets         = data.aws_subnet_ids.selected_subnets.ids
+
+  node_groups = {
+    eks_nodes = {
+      desired_capacity = 2
+      max_size         = 3
+      min_size         = 1
+      instance_type    = "t3.medium"
+    }
+  }
+
+  tags = {
+    Environment = "Production"
+    Project     = "Ankimozzi"
+  }
+}
 # Lambda 함수 가져오기
 data "aws_lambda_function" "lambda_functions" {
   for_each      = toset(var.lambda_names)
