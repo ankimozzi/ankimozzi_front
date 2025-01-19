@@ -23,15 +23,13 @@ jobs:
 
       # 3. Terraform 초기화 (Init)
       - name: Terraform Init
-        run: terraform init
-
-      # 4. Terraform Plan 실행 (변경 사항 확인)
+        run: cd terraform && terraform init
+    
       - name: Terraform Plan
-        run: terraform plan
-
-      # 5. Terraform Apply 실행 (변경 사항 적용)
+        run: cd terraform && terraform plan
+    
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: cd terraform && terraform apply -auto-approve
 
       # 6. Slack 알림 (선택 사항)
       # - name: Notify Slack
