@@ -14,27 +14,39 @@ jobs:
       # 1. GitHub 저장소에서 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      # 2. Terraform 설치
+      # 2. AWS 자격 증명 테스트 (선택 사항)
+      - name: Check AWS Credentials
+        run: aws sts get-caller-identity
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # 3. Terraform 설치
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.4.0
 
-      # 3. Terraform 초기화 (Init)
+      # 4. Terraform 초기화
       - name: Terraform Init
         run: cd terraform && terraform init
-    
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # 5. Terraform Plan 실행
       - name: Terraform Plan
         run: cd terraform && terraform plan
-    
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # 6. Terraform Apply 실행
       - name: Terraform Apply
         run: cd terraform && terraform apply -auto-approve
-
-      # 6. Slack 알림 (선택 사항)
-      # - name: Notify Slack
-      #   uses: rtCamp/action-slack-notify@v2
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      #   with:
-      #     args: "Terraform Apply 완료 🚀"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
