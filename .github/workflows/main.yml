@@ -1,0 +1,42 @@
+name: Terraform CI/CD for terraform-infra
+
+on:
+  push:
+    branches:
+      - terraform-infra
+
+jobs:
+  terraform:
+    name: Apply Terraform Changes
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. GitHub 저장소에서 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Terraform 설치
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.4.0
+
+      # 3. Terraform 초기화 (Init)
+      - name: Terraform Init
+        run: terraform init
+
+      # 4. Terraform Plan 실행 (변경 사항 확인)
+      - name: Terraform Plan
+        run: terraform plan
+
+      # 5. Terraform Apply 실행 (변경 사항 적용)
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      # 6. Slack 알림 (선택 사항)
+      # - name: Notify Slack
+      #   uses: rtCamp/action-slack-notify@v2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #   with:
+      #     args: "Terraform Apply 완료 🚀"
