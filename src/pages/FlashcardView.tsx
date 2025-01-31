@@ -6,12 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface Flashcard {
   id: number;
@@ -32,12 +26,13 @@ interface LocationState {
 const FlashcardView = () => {
   const { deckId } = useParams<{ deckId: string }>();
   const location = useLocation();
-  console.log("Location State:", location.state);
 
   const { deckResponse } = (location.state as LocationState) || {};
-  console.log("Deck Response:", deckResponse);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const { toast } = useToast();
+  const [flippedCards, setFlippedCards] = useState<{ [key: number]: boolean }>(
+    {}
+  );
 
   useEffect(() => {
     console.log("Deck Response:", deckResponse);
@@ -66,28 +61,20 @@ const FlashcardView = () => {
     }
   }, [deckResponse]);
 
-  const handleCopyFlashcard = (card: Flashcard) => {
-    navigator.clipboard.writeText(`${card.answer}    ${card.question}`);
-    toast({
-      title: "Copied!",
-      description: "Flashcard copied to clipboard",
-      duration: 2000,
-    });
-  };
-
   const handleCopyAllJSON = () => {
     if (deckResponse?.data) {
       navigator.clipboard.writeText(deckResponse.data);
       toast({
-        title: "Success",
-        description: "All flashcards copied for Quizlet",
+        variant: "default",
+        title: "Copied! 📋",
+        description: "All flashcards have been copied in Quizlet format.",
         duration: 2000,
       });
     } else {
       toast({
-        title: "Error",
-        description: "No data available to copy",
         variant: "destructive",
+        title: "Error",
+        description: "No data available to copy.",
       });
     }
   };
@@ -105,22 +92,30 @@ const FlashcardView = () => {
       link.click();
       URL.revokeObjectURL(url);
       toast({
-        title: "Downloaded!",
-        description: "Word document has been downloaded",
+        variant: "default",
+        title: "Downloaded! 📥",
+        description: "Word document has been downloaded.",
         duration: 2000,
       });
     } else {
       toast({
-        title: "Error",
-        description: "No flashcards available to download",
         variant: "destructive",
+        title: "Error",
+        description: "No flashcards available to download.",
       });
     }
   };
 
+  const handleFlipCard = (cardId: number) => {
+    setFlippedCards((prev) => ({
+      ...prev,
+      [cardId]: !prev[cardId],
+    }));
+  };
+
   return (
     <div className="container mx-auto py-8 space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold tracking-tight">
           Flashcards for {deckId}
         </h1>
@@ -144,50 +139,48 @@ const FlashcardView = () => {
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 max-w-3xl mx-auto">
         {flashcards.length > 0 ? (
-          flashcards.map((card) => (
-            <Card key={card.id}>
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="grid grid-cols-2 gap-8 flex-1">
-                  <div>
-                    <p className="font-semibold text-sm text-muted-foreground mb-1">
-                      Answer
-                    </p>
-                    <p className="text-lg">{card.answer}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-muted-foreground mb-1">
-                      Question
-                    </p>
-                    <p className="text-lg">{card.question}</p>
+          flashcards.map((card, index) => (
+            <Card
+              key={card.id}
+              onClick={() => handleFlipCard(card.id)}
+              className="cursor-pointer relative min-h-[120px]"
+            >
+              <CardContent className="p-4">
+                <div
+                  className={`transition-all duration-300 ${
+                    flippedCards[card.id] ? "opacity-0" : "opacity-100"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-muted-foreground mb-1">
+                        Question {index + 1}
+                      </p>
+                      <p className="text-base">{card.question}</p>
+                    </div>
                   </div>
                 </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleCopyFlashcard(card)}
-                        className="flex-shrink-0 ml-4"
-                      >
-                        <FontAwesomeIcon
-                          icon={faClipboard}
-                          className="h-4 w-4"
-                        />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Copy to clipboard</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <div
+                  className={`absolute inset-0 p-4 transition-all duration-300 ${
+                    flippedCards[card.id] ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-muted-foreground mb-1">
+                        Answer {index + 1}
+                      </p>
+                      <p className="text-base">{card.answer}</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Skeleton className="h-[120px] w-full rounded-lg" />
             <Skeleton className="h-[120px] w-full rounded-lg" />
             <Skeleton className="h-[120px] w-full rounded-lg" />
