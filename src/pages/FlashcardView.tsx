@@ -11,6 +11,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Document, Paragraph, Packer } from 'docx';
+import { useLoadingStore } from '@/store/useLoadingStore';
+import Loading from '@/components/Loading';
 
 interface Flashcard {
   id: number;
@@ -39,31 +41,42 @@ const FlashcardView = () => {
     {}
   );
 
-  useEffect(() => {
-    console.log("Deck Response:", deckResponse);
-    if (deckResponse?.data) {
-      try {
-        const parsedFlashcards = deckResponse.data
-          .split("\n")
-          .filter((line: string) => line.trim())
-          .map((line: string, index: number) => {
-            const [answer, question] = line
-              .split("\t")
-              .map((part: string) => part.trim());
-            return {
-              id: index,
-              question: question || "No question provided",
-              answer: answer || "No answer provided",
-            };
-          });
+  const { isLoading, isComplete, message } = useLoadingStore();
+  const { startLoading, completeLoading } = useLoadingStore();
 
-        setFlashcards(parsedFlashcards);
+  useEffect(() => {
+    const fetchData = async () => {
+      startLoading('Loading flashcards...');
+      try {
+        console.log("Deck Response:", deckResponse);
+        if (deckResponse?.data) {
+          const parsedFlashcards = deckResponse.data
+            .split("\n")
+            .filter((line: string) => line.trim())
+            .map((line: string, index: number) => {
+              const [answer, question] = line
+                .split("\t")
+                .map((part: string) => part.trim());
+              return {
+                id: index,
+                question: question || "No question provided",
+                answer: answer || "No answer provided",
+              };
+            });
+
+          setFlashcards(parsedFlashcards);
+          completeLoading();
+        } else {
+          console.warn("No deck data available.");
+          completeLoading();
+        }
       } catch (error) {
         console.error("Error parsing flashcards:", error);
+        completeLoading();
       }
-    } else {
-      console.warn("No deck data available.");
-    }
+    };
+
+    fetchData();
   }, [deckResponse]);
 
   const handleCopyAllJSON = () => {
@@ -129,6 +142,7 @@ const FlashcardView = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 space-y-8">
+      {isLoading && <Loading isComplete={isComplete} message={message} />}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 max-w-3xl mx-auto">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Flashcards for {deckId}

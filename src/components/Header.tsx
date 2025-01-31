@@ -13,7 +13,6 @@ import {
 const Header = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,8 +50,8 @@ const Header = () => {
     >
       <div className="mx-auto flex h-16 sm:h-[4.5rem] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* 로고 */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className={`
             flex items-center space-x-2 transition-transform duration-200 hover:scale-105
             ${isDarkTheme ? "text-white" : "text-gray-900"}
@@ -134,7 +133,6 @@ const Header = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`text-lg font-semibold transition-colors
                     ${
                       isActive(link.path)

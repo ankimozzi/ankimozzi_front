@@ -26,7 +26,6 @@ import loading3 from "../assets/loading_3.svg";
 const GeneratePage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [deckName, setDeckName] = useState<string>("");
-  const [uploadStatus, setUploadStatus] = useState<string>("");
   const [polling, setPolling] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -138,9 +137,6 @@ const GeneratePage = () => {
       });
     } catch (error) {
       console.error("Error during file upload or deck generation:", error);
-      setUploadStatus(
-        "An error occurred during the process. Please try again."
-      );
       setPolling(false);
       setIsError(true);
     }
@@ -163,8 +159,8 @@ const GeneratePage = () => {
             className={`
               rounded-lg border-2 border-dashed
               p-4 sm:p-8 text-center transition-all
-              ${!file ? 'hover:border-primary cursor-pointer' : ''}
-              ${polling ? 'bg-muted' : ''}
+              ${!file ? "hover:border-primary cursor-pointer" : ""}
+              ${polling ? "bg-muted" : ""}
             `}
           >
             {!file ? (
@@ -173,7 +169,9 @@ const GeneratePage = () => {
                   <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
                 <div className="space-y-1 sm:space-y-2">
-                  <h3 className="font-semibold text-sm sm:text-base">Upload your lecture video or audio</h3>
+                  <h3 className="font-semibold text-sm sm:text-base">
+                    Upload your lecture video or audio
+                  </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     Supported formats: .mp4, .wav, .mp3, .flac, .ogg
                   </p>
@@ -198,7 +196,9 @@ const GeneratePage = () => {
                   <FileIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <p className="font-medium truncate text-sm sm:text-base">{file.name}</p>
+                  <p className="font-medium truncate text-sm sm:text-base">
+                    {file.name}
+                  </p>
                   <p className="text-xs sm:text-sm text-muted-foreground">
                     {(file.size / (1024 * 1024)).toFixed(1)} MB
                   </p>
@@ -248,13 +248,15 @@ const GeneratePage = () => {
           {isError ? (
             <>
               <DialogHeader>
-                <DialogTitle className="text-lg sm:text-xl">Error Occurred</DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl">
+                  Error Occurred
+                </DialogTitle>
                 <DialogDescription className="text-sm sm:text-base">
                   An error occurred during the process. Please try again.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex justify-end">
-                <Button 
+                <Button
                   onClick={handleModalClose}
                   className="text-sm sm:text-base h-9 sm:h-10"
                 >
