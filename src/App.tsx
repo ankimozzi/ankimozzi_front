@@ -4,6 +4,7 @@ import FlashcardView from "./pages/FlashcardView.tsx";
 import DeckListView from "./pages/DeckListView.tsx";
 import Home from "./pages/Home.tsx";
 import Header from "./components/Header.tsx";
+import { Toaster } from "@/components/ui/toaster"
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
             <Route path="/flashcards" element={<FlashcardView />} />
           </Routes>
         </main>
+        <Toaster />
       </div>
     </Router>
   );

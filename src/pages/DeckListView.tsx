@@ -5,6 +5,7 @@ import Loading from "../components/Loading";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PlusCircle } from "lucide-react";
+import { useLoadingStore } from "@/store/useLoadingStore";
 
 // API 응답 타입
 interface ApiResponse {
@@ -33,24 +34,21 @@ const DeckListView = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [deckList, setDeckList] = useState<Deck[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  const { startLoading, completeLoading, isLoading, isComplete } =
+    useLoadingStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadCategories = async () => {
+      startLoading("Loading categories...");
       try {
-        setIsLoading(true);
         const response = await fetchCategories();
-        console.log("Categories Response:", response); // 디버깅용
-
         const categoriesData = JSON.parse(response.body);
         setCategories(categoriesData);
 
         if (categoriesData.length > 0) {
           setSelectedCategory(categoriesData[0]);
           const decksResponse = await fetchDeckList(categoriesData[0]);
-          console.log("Decks Response:", decksResponse); // 디버깅용
-
           const parsedDecks = JSON.parse(decksResponse.body);
           if (Array.isArray(parsedDecks) && parsedDecks.length > 0) {
             const selectedDeck = parsedDecks.find(
@@ -65,14 +63,14 @@ const DeckListView = () => {
         console.error("Error loading data:", error);
         setCategories([]);
       } finally {
-        setIsLoading(false);
+        completeLoading();
       }
     };
     loadCategories();
   }, []);
 
   const handleCategoryClick = async (category: string) => {
-    setIsLoading(true);
+    startLoading("Loading flashcards...");
     setSelectedCategory(category);
     try {
       const decksResponse = (await fetchDeckList(category)) as ApiResponse;
@@ -92,7 +90,7 @@ const DeckListView = () => {
       }
       setDeckList([]);
     } finally {
-      setIsLoading(false);
+      completeLoading();
     }
   };
 
@@ -103,11 +101,9 @@ const DeckListView = () => {
     try {
       if (!extractedString) return;
 
+      startLoading("Loading deck...");
       const response = (await fetchDeck(extractedString)) as ApiResponse;
-      console.log("Deck API Response:", response); // 디버깅 추가
-
       const jsonObject = JSON.parse(response.body);
-      console.log("Parsed JSON:", jsonObject); // 디버깅 추가
 
       navigate(`/flashcards/${extractedString}`, {
         state: {
@@ -116,14 +112,15 @@ const DeckListView = () => {
       });
     } catch (error) {
       console.error("Error in handleDeckClick:", error);
+    } finally {
+      completeLoading();
     }
   };
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
+      {isLoading && <Loading isComplete={isComplete} />}
       <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
-        {isLoading && <Loading message="Loading flashcards..." />}
-
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
