@@ -115,6 +115,11 @@ const Home = () => {
         <h2 className="text-3xl font-bold mb-8 text-center">👨‍💻 만든 사람들</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <TeamMember
+            name="김기훈"
+            role="Backend Engineer"
+            description="확장 가능한 영상 처리 파이프라인 및 아키텍처 설계"
+          />
+          <TeamMember
             name="김동연"
             role="Full-stack Engineer"
             description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현"
@@ -123,11 +128,6 @@ const Home = () => {
             name="나덕룡 (Nathan)"
             role="Front Engineer, Market Research Analyst"
             description="프론트 개발 & 시장 조사, 비즈니스 전략 수립"
-          />
-          <TeamMember
-            name="김기훈"
-            role="Backend Engineer"
-            description="확장 가능한 영상 처리 파이프라인 및 아키텍처 설계"
           />
         </div>
       </section>
