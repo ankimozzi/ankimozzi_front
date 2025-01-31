@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateUploadURL, checkDeckStatus } from "../api/api";
-import "../styles/Home.css";
 import "../styles/GeneratePage.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile } from "@fortawesome/free-solid-svg-icons";
@@ -141,63 +140,91 @@ const GeneratePage = () => {
   };
 
   return (
-    <div className="home-container">
-      <h1 className="home-title">Generate Flashcard from Video</h1>
+    <div className="font-inter p-5">
+      <h1 className="text-2xl font-bold mb-5">Generate Flashcard from Video</h1>
 
-      <div className="file-upload-box">
-        {!file ? (
-          <>
-            <p className="upload-title">Upload your lecture video or audio</p>
-            <p className="upload-subtitle">
-              Supported formats: .mp4, .wav, .mp3, .flac, .ogg
-            </p>
-            <label className="browse-files-button">
-              <input
-                type="file"
-                onChange={handleFileChange}
-                accept=".mp4,.wav,.mp3,.flac,.ogg"
-                className="file-input"
-                hidden
-              />
-              Browse files
-            </label>
-          </>
-        ) : (
-          <div className="file-info">
-            <div className="file-icon">
-              <FontAwesomeIcon icon={faFile} />
+      <div className="mx-[180px] my-20">
+        <div className={`
+          rounded-xl bg-white border-2 border-dashed border-[#edeff5] 
+          p-8 text-center transition-all cursor-pointer
+          ${polling ? 'bg-[#edeff5] border-[#edeff5]' : ''}
+        `}>
+          {!file ? (
+            <>
+              <p className="text-base font-medium text-[#1a1a1a] mb-2">
+                Upload your lecture video or audio
+              </p>
+              <p className="text-sm text-[#666666] mb-4">
+                Supported formats: .mp4, .wav, .mp3, .flac, .ogg
+              </p>
+              <label className="
+                inline-block px-4 py-2 rounded-xl bg-white 
+                border-2 border-[#edeff5] text-[#1a1a1a] 
+                text-sm font-medium cursor-pointer 
+                transition-all hover:bg-[#edeff5]
+              ">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".mp4,.wav,.mp3,.flac,.ogg"
+                  className="hidden"
+                />
+                Browse files
+              </label>
+            </>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="
+                w-12 h-12 bg-[#f0f0f0] flex items-center justify-center 
+                rounded-xl text-2xl text-[#666666] flex-shrink-0
+              ">
+                <FontAwesomeIcon icon={faFile} />
+              </div>
+              <span className="flex-1 text-sm font-semibold text-[#1a1a1a] text-left">
+                {file.name}
+              </span>
+              <span className="text-sm text-[#666666]">
+                {(file.size / (1024 * 1024)).toFixed(1)} MB
+              </span>
+              <button 
+                className="p-1 text-[#666666] hover:text-[#ff4444]"
+                onClick={handleRemoveFile}
+              >
+                Remove
+              </button>
             </div>
-            <span className="file-name">{file.name}</span>
-            <span className="file-size">
-              {(file.size / (1024 * 1024)).toFixed(1)} MB
-            </span>
-            <button className="remove-button" onClick={handleRemoveFile}>
-              Remove
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <div className="input-section">
-        <label className="input-label">
+      <div className="mx-[180px] my-6">
+        <label className="block text-base font-semibold mb-4 text-[#1a1a1a]">
           Deck Name
-          <span style={{ color: "#F83446" }}>*</span>
+          <span className="text-[#F83446]">*</span>
         </label>
         <input
           type="text"
           placeholder="Enter deck name"
           value={deckName}
           onChange={handleDeckNameChange}
-          className={`home-input ${!file ? "disabled" : ""}`}
+          className={`
+            w-full p-4 text-base border-2 border-[#edeff5] 
+            rounded-xl bg-white transition-all box-border
+            focus:outline-none focus:border-[#007aff]
+            ${!file ? 'bg-[#f5f5f5] cursor-not-allowed' : ''}
+          `}
           disabled={!file}
         />
       </div>
 
-      <div className="generate-button-container">
+      <div className="flex justify-end mx-[180px] my-6">
         <button
-          className={`generate-button ${
-            !file || !deckName.trim() ? "disabled" : ""
-          }`}
+          className={`
+            px-6 py-3 rounded-xl bg-[#4255ff] text-white 
+            border-none text-base font-medium cursor-pointer 
+            transition-all hover:opacity-90
+            disabled:bg-[#a0aaff] disabled:cursor-not-allowed
+          `}
           onClick={handleGenerate}
           disabled={!file || !deckName.trim() || polling}
         >
@@ -205,17 +232,34 @@ const GeneratePage = () => {
         </button>
       </div>
 
-      {uploadStatus && <p className="status-message">{uploadStatus}</p>}
+      {uploadStatus && (
+        <p className="text-center">{uploadStatus}</p>
+      )}
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="
+          fixed inset-0 bg-black/60 
+          flex justify-center items-center z-50
+        ">
+          <div className="
+            flex flex-col items-center justify-center text-center 
+            p-8 bg-white rounded-xl shadow-lg
+          ">
             {isError ? (
               <>
-                <h2>Error Occurred</h2>
-                <p>An error occurred during the process. Please try again.</p>
-                <button className="generate-button" onClick={handleModalClose}>
+                <h2 className="text-2xl text-[#333] mb-2">Error Occurred</h2>
+                <p className="text-base text-[#666]">
+                  An error occurred during the process. Please try again.
+                </p>
+                <button 
+                  className="
+                    mt-4 px-6 py-3 rounded-xl bg-[#4255ff] 
+                    text-white border-none text-base font-medium 
+                    cursor-pointer transition-all hover:opacity-90
+                  "
+                  onClick={handleModalClose}
+                >
                   Go Back
                 </button>
               </>
@@ -224,17 +268,12 @@ const GeneratePage = () => {
                 <img
                   src={images[imageIndex]}
                   alt={`Loading animation ${imageIndex + 1}`}
-                  style={{
-                    width: "100px",
-                    marginBottom: "20px",
-                    transition: "opacity 0.3s ease",
-                    opacity: 1,
-                  }}
+                  className="w-[100px] mb-5 transition-opacity duration-300 opacity-100"
                 />
-                <h2 style={{ color: "#4255ff" }}>
+                <h2 className="text-2xl text-[#4255ff] mb-2">
                   Generating your flashcard set...
                 </h2>
-                <p>
+                <p className="text-base text-[#666]">
                   This may take a while depending on the size of your upload
                 </p>
               </>

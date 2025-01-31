@@ -1,116 +1,136 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { fetchCategories, fetchDeck, fetchDeckList } from "../api/api";
-import "../styles/Home.css";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+
+const FeatureCard = ({ icon, title, description }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    className="p-6 rounded-lg bg-white/5 backdrop-blur-sm"
+  >
+    <div className="text-2xl mb-2">{icon}</div>
+    <h3 className="text-xl font-bold mb-2">{title}</h3>
+    <p className="text-gray-300">{description}</p>
+  </motion.div>
+);
+
+const TeamMember = ({ name, role, description }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    className="p-6 rounded-lg bg-white/5 backdrop-blur-sm"
+  >
+    <h3 className="text-xl font-bold mb-2">{name}</h3>
+    <p className="text-blue-400 mb-2">{role}</p>
+    <p className="text-gray-300">{description}</p>
+  </motion.div>
+);
 
 const Home = () => {
-  const [categories, setCategories] = useState([]);
-  const [deckList, setDeckList] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [deckData, setDeckData] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const categoriesData = await fetchCategories();
-        setCategories(categoriesData);
-        // 첫 번째 카테고리 자동 선택 및 해당 카테고리의 덱 로드
-        if (categoriesData.length > 0) {
-          setSelectedCategory(categoriesData[0]);
-          const decks = await fetchDeckList(categoriesData[0]);
-          setDeckList(decks);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error.message);
-      }
-    };
-    loadCategories();
-  }, []);
-
-  const handleCategoryClick = async (category) => {
-    setSelectedCategory(category);
-    try {
-      const decks = await fetchDeckList(category);
-      setDeckList(decks);
-    } catch (error) {
-      console.error("Error fetching decks:", error.message);
-      setDeckList([]);
-    }
-  };
-
-  const handleDeckClick = async (deckName) => {
-    const match = deckName.question.match(/-(.+?)\.mp4/);
-    const extractedString = match ? match[1] : null;
-    try {
-      const decks = await fetchDeck(extractedString);
-      setDeckData(decks.body);
-      const jsonObject = JSON.parse(decks.body);
-
-      navigate(`/flashcards/${extractedString}`, {
-        state: { deckResponse: jsonObject },
-      });
-    } catch (error) {
-      console.error("Error fetching decks:", error.message);
-      setDeckList([]);
-    }
-  };
-
   return (
-    <div className="font-['Inter'] p-5">
-      <header className="flex justify-between items-center mb-5">
-        <h1 className="text-2xl font-bold">Video Flashcards</h1>
-        <button
-          className="px-5 py-2.5 bg-[#4255ff] text-white text-base rounded hover:bg-[#222fa1] transition-colors"
-          onClick={() => navigate("/generate")}
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-blue-900 text-white">
+      {/* 헤더 섹션 */}
+      <header className="container mx-auto px-4 py-20 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl font-bold mb-6"
         >
-          + Generate
-        </button>
+          AI가 만드는 자동 퀴즈 덱, Duel 🚀
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-xl text-gray-300 mb-8"
+        >
+          학습 콘텐츠 제작, 아직도 수작업으로 하시나요?
+        </motion.p>
+        <p className="text-lg text-gray-300 mb-8">
+          Duel은 영상을 업로드하는 것만으로 AI가 자동으로 Quizlet 덱을 생성하는
+          서비스입니다.
+        </p>
+        <Link
+          to="/generate"
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+        >
+          시작하기
+        </Link>
       </header>
 
-      <nav className="flex justify-start gap-4 mb-8">
-        {categories.map((category, index) => (
-          <button
-            key={index}
-            className={`relative text-base font-semibold text-[#4255ff] hover:text-[#222fa1] transition-colors
-              ${
-                selectedCategory === category
-                  ? "after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-1 after:bg-[#4255ff]"
-                  : ""
-              }`}
-            onClick={() => handleCategoryClick(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </nav>
+      {/* 타겟 사용자 섹션 */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold mb-8 text-center">
+          ✨ 이런 분들을 위해 만들었어요
+        </h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <FeatureCard
+            icon="🎓"
+            title="교육자"
+            description="강의 영상에서 퀴즈를 만들어 학생들에게 공유하고 싶은 교육자"
+          />
+          <FeatureCard
+            icon="📚"
+            title="학생"
+            description="영상 콘텐츠로 자기주도 학습을 하고 싶은 학생"
+          />
+          <FeatureCard
+            icon="💡"
+            title="EdTech 개발자"
+            description="AI 기반 학습 콘텐츠 제작을 고민하는 EdTech 개발자"
+          />
+        </div>
+      </section>
 
-      <div className="bg-[#f6f7fb] p-5 -mx-5 min-h-[calc(100vh-250px)] relative">
-        <h2 className="mb-4">Flashcard Sets</h2>
-        {deckList.length > 0 ? (
-          <div className="grid grid-cols-3 gap-5">
-            {deckList.map((deck, index) => (
-              <div
-                key={index}
-                className="bg-white border-2 border-[#edeff5] rounded-xl p-8 text-left cursor-pointer
-                  hover:border-[#a0aaff] active:border-[#4255ff] transition-all"
-                onClick={() => handleDeckClick(deck)}
-              >
-                <h3 className="text-[1.1rem] font-medium text-gray-800 m-0">
-                  {deck.question}
-                </h3>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-            text-[1.2rem] text-gray-500 text-center pointer-events-none"
-          >
-            No decks available
-          </p>
-        )}
-      </div>
+      {/* 특징 섹션 */}
+      <section className="container mx-auto px-4 py-16 bg-white/5">
+        <h2 className="text-3xl font-bold mb-8 text-center">
+          ✨ Duel이 특별한 이유
+        </h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          <FeatureCard
+            icon="🔹"
+            title="자동 퀴즈 덱 생성"
+            description="영상만 올리면 AI가 주요 개념을 분석해 즉시 Quizlet 덱으로 변환합니다."
+          />
+          <FeatureCard
+            icon="🔹"
+            title="20M+ 사용자를 처리하는 서버리스 인프라"
+            description="확장성이 뛰어난 AWS 기반 서버리스 구조로 안정적인 서비스 제공."
+          />
+          <FeatureCard
+            icon="🔹"
+            title="AI 기반 최적화"
+            description="퀴즈 생성 프로세스를 카테고리 기반으로 최적화해, Quizlet 운영 비용 대비 4% 수준으로 효율적으로 운영합니다."
+          />
+          <FeatureCard
+            icon="🔹"
+            title="자동화된 인프라 관리"
+            description="Terraform을 활용한 AWS 리소스 배포 및 관리까지 자동화하여 유지보수 부담을 최소화했습니다."
+          />
+        </div>
+      </section>
+
+      {/* 팀 소개 섹션 */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold mb-8 text-center">👨‍💻 만든 사람들</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          <TeamMember
+            name="김동연"
+            role="Full-stack Engineer"
+            description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현"
+          />
+          <TeamMember
+            name="나덕룡 (Nathan)"
+            role="Front Engineer, Market Research Analyst"
+            description="프론트 개발 & 시장 조사, 비즈니스 전략 수립"
+          />
+          <TeamMember
+            name="김기훈"
+            role="Backend Engineer"
+            description="확장 가능한 영상 처리 파이프라인 및 아키텍처 설계"
+          />
+        </div>
+      </section>
     </div>
   );
 };
