@@ -25,15 +25,30 @@ const TeamMember = ({
   name,
   role,
   description,
+  linkedIn,
 }: {
   name: string;
   role: string;
   description: string;
+  linkedIn: string;
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
-    className="p-6 rounded-lg bg-white/5 backdrop-blur-sm"
+    className="group p-6 rounded-lg bg-white/5 backdrop-blur-sm 
+      transition-all duration-300 cursor-pointer
+      hover:bg-white/10 hover:shadow-lg hover:-translate-y-1
+      hover:ring-1 hover:ring-white/20"
+    onClick={() =>
+      window.open(`https://www.linkedin.com/in/${linkedIn}`, "_blank")
+    }
+    onKeyDown={(e) =>
+      e.key === "Enter" &&
+      window.open(`https://www.linkedin.com/in/${linkedIn}`, "_blank")
+    }
+    tabIndex={0}
+    role="link"
+    aria-label={`Visit ${name}'s LinkedIn profile`}
   >
     <h3 className="text-xl font-bold mb-2">{name}</h3>
     <p className="text-blue-400 mb-2">{role}</p>
@@ -134,16 +149,19 @@ const Home = () => {
             name="김기훈"
             role="Backend Engineer"
             description="확장 가능한 영상 처리 파이프라인 및 아키텍처 설계"
+            linkedIn="kihoon-noah-kim"
           />
           <TeamMember
             name="김동연"
             role="Full-stack Engineer"
             description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현"
+            linkedIn="yeonnnn"
           />
           <TeamMember
             name="나덕룡 (Nathan)"
             role="Front Engineer, Market Research Analyst"
             description="프론트 개발 & 시장 조사, 비즈니스 전략 수립"
+            linkedIn="deokryongna"
           />
         </div>
       </section>
