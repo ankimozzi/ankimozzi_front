@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -99,19 +100,23 @@ const Header = () => {
 
         {/* 데스크톱 로그인/회원가입 버튼 */}
         <div className="hidden md:flex items-center space-x-4">
-          {/* <button
+          <button
             className={`text-base font-semibold transition-colors
               ${
                 isDarkTheme
                   ? "text-gray-300 hover:text-white"
                   : "text-gray-600 hover:text-gray-900"
               }`}
+            onClick={() => navigate("/login")}
           >
             Login
           </button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => navigate("/signup")}
+          >
             Sign up
-          </Button> */}
+          </Button>
         </div>
 
         {/* 모바일 메뉴 버튼 */}
@@ -149,17 +154,21 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
-              {/* <div className="pt-4 border-t">
+              <div className="pt-4 border-t">
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-lg font-semibold text-gray-600 hover:text-gray-900"
+                  onClick={() => navigate("/login")}
                 >
                   Login
                 </Button>
-                <Button className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white">
+                <Button
+                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => navigate("/signup")}
+                >
                   Sign up
                 </Button>
-              </div> */}
+              </div>
             </div>
           </SheetContent>
         </Sheet>
