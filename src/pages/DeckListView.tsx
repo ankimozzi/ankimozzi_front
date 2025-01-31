@@ -1,13 +1,36 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchCategories, fetchDeck, fetchDeckList } from "../api/api";
-import Loading from "./Loading";
+import Loading from "../components/Loading";
+
+// API 응답 타입
+interface ApiResponse {
+  statusCode: number;
+  body: string;
+}
+
+// 덱 리스트 아이템 타입
+interface QuestionItem {
+  question: string;
+  url: string;
+}
+
+interface DeckListItem {
+  category: string;
+  question_list: QuestionItem[];
+}
+
+// 컴포넌트에서 사용할 타입
+interface Deck {
+  question: string;
+  url: string;
+}
 
 const Home = () => {
-  const [categories, setCategories] = useState([]);
-  const [deckList, setDeckList] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [deckData, setDeckData] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [deckList, setDeckList] = useState<Deck[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [deckData, setDeckData] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -15,15 +38,30 @@ const Home = () => {
     const loadCategories = async () => {
       try {
         setIsLoading(true);
-        const categoriesData = await fetchCategories();
+        const response = await fetchCategories();
+        console.log("Categories Response:", response); // 디버깅용
+        
+        const categoriesData = JSON.parse(response.body);
         setCategories(categoriesData);
+
         if (categoriesData.length > 0) {
           setSelectedCategory(categoriesData[0]);
-          const decks = await fetchDeckList(categoriesData[0]);
-          setDeckList(decks);
+          const decksResponse = await fetchDeckList(categoriesData[0]);
+          console.log("Decks Response:", decksResponse); // 디버깅용
+          
+          const parsedDecks = JSON.parse(decksResponse.body);
+          if (Array.isArray(parsedDecks) && parsedDecks.length > 0) {
+            const selectedDeck = parsedDecks.find(
+              deck => deck.category === categoriesData[0]
+            );
+            if (selectedDeck?.question_list) {
+              setDeckList(selectedDeck.question_list);
+            }
+          }
         }
       } catch (error) {
-        console.error("Error fetching categories:", error.message);
+        console.error("Error loading data:", error);
+        setCategories([]);
       } finally {
         setIsLoading(false);
       }
@@ -31,34 +69,51 @@ const Home = () => {
     loadCategories();
   }, []);
 
-  const handleCategoryClick = async (category) => {
+  const handleCategoryClick = async (category: string) => {
     setIsLoading(true);
     setSelectedCategory(category);
     try {
-      const decks = await fetchDeckList(category);
-      setDeckList(decks);
+      const decksResponse = (await fetchDeckList(category)) as ApiResponse;
+      const parsedDecks = JSON.parse(decksResponse.body) as DeckListItem[];
+      const selectedDeck = parsedDecks.find(
+        (deck) => deck.category === category
+      );
+
+      if (selectedDeck) {
+        setDeckList(selectedDeck.question_list);
+      } else {
+        setDeckList([]);
+      }
     } catch (error) {
-      console.error("Error fetching decks:", error.message);
+      if (error instanceof Error) {
+        console.error("Error fetching decks:", error.message);
+      }
       setDeckList([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDeckClick = async (deckName) => {
-    const match = deckName.question.match(/-(.+?)\.mp4/);
+  const handleDeckClick = async (deck: Deck) => {
+    const match = deck.question.match(/-(.+?)\.mp4/);
     const extractedString = match ? match[1] : null;
+    
     try {
-      const decks = await fetchDeck(extractedString);
-      setDeckData(decks.body);
-      const jsonObject = JSON.parse(decks.body);
+      if (!extractedString) return;
+      
+      const response = await fetchDeck(extractedString) as ApiResponse;
+      console.log("Deck API Response:", response); // 디버깅 추가
+      
+      const jsonObject = JSON.parse(response.body);
+      console.log("Parsed JSON:", jsonObject); // 디버깅 추가
 
       navigate(`/flashcards/${extractedString}`, {
-        state: { deckResponse: jsonObject },
+        state: { 
+          deckResponse: jsonObject 
+        }
       });
     } catch (error) {
-      console.error("Error fetching decks:", error.message);
-      setDeckList([]);
+      console.error("Error in handleDeckClick:", error);
     }
   };
 

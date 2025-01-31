@@ -1,7 +1,15 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-const FeatureCard = ({ icon, title, description }) => (
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -13,7 +21,15 @@ const FeatureCard = ({ icon, title, description }) => (
   </motion.div>
 );
 
-const TeamMember = ({ name, role, description }) => (
+const TeamMember = ({
+  name,
+  role,
+  description,
+}: {
+  name: string;
+  role: string;
+  description: string;
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}

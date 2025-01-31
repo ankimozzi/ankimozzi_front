@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import GeneratePage from "./pages/GeneratePage";
-import FlashcardView from "./pages/FlashcardView";
-import DeckListView from "./pages/DeckListView";
-import Home from "./pages/Home";
-import Header from "./components/Header";
+import GeneratePage from "./pages/GeneratePage.tsx";
+import FlashcardView from "./pages/FlashcardView.tsx";
+import DeckListView from "./pages/DeckListView.tsx";
+import Home from "./pages/Home.tsx";
+import Header from "./components/Header.tsx";
 
 const App = () => {
   return (

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateUploadURL, checkDeckStatus } from "../api/api";
-import "../styles/GeneratePage.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile } from "@fortawesome/free-solid-svg-icons";
 import loading1 from "../assets/loading_1.svg";
@@ -9,34 +8,29 @@ import loading2 from "../assets/loading_2.svg";
 import loading3 from "../assets/loading_3.svg";
 
 const GeneratePage = () => {
-  const [file, setFile] = useState(null);
-  const [deckName, setDeckName] = useState("");
-  const [uploadStatus, setUploadStatus] = useState("");
-  const [polling, setPolling] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const [isError, setIsError] = useState(false); // Error state for modal
-  const [imageIndex, setImageIndex] = useState(0); // Index for cycling images
+  const [file, setFile] = useState<File | null>(null);
+  const [deckName, setDeckName] = useState<string>("");
+  const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [polling, setPolling] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [imageIndex, setImageIndex] = useState<number>(0);
   const navigate = useNavigate();
 
   const images = [loading1, loading2, loading3];
 
   useEffect(() => {
-    let imageInterval;
-
+    let imageInterval: NodeJS.Timeout;
     if (isModalOpen && !isError) {
-      // Cycle images every 0.3 seconds
       imageInterval = setInterval(() => {
         setImageIndex((prev) => (prev + 1) % images.length);
       }, 300);
     }
-
-    return () => {
-      clearInterval(imageInterval);
-    };
+    return () => clearInterval(imageInterval);
   }, [isModalOpen, isError]);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       const validTypes = [
         "video/mp4",
@@ -57,18 +51,18 @@ const GeneratePage = () => {
     setFile(null);
   };
 
-  const handleDeckNameChange = (e) => {
+  const handleDeckNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDeckName(e.target.value);
   };
 
   const handleModalClose = () => {
-    setIsModalOpen(false); // Close modal
-    setIsError(false); // Reset error state
+    setIsModalOpen(false);
+    setIsError(false);
   };
 
-  const pollForDeckCompletion = async (deckName) => {
+  const pollForDeckCompletion = async (deckName: string) => {
     let attempts = 0;
-    const maxAttempts = 100; // Poll up to 100 times
+    const maxAttempts = 100;
 
     while (attempts < maxAttempts) {
       try {
@@ -79,7 +73,6 @@ const GeneratePage = () => {
           return response;
         }
 
-        // Wait 3 seconds before retrying
         await new Promise((resolve) => setTimeout(resolve, 3000));
         attempts++;
       } catch (error) {
@@ -100,10 +93,9 @@ const GeneratePage = () => {
     }
 
     try {
-      setIsModalOpen(true); // Open modal
-      setIsError(false); // Reset error state
+      setIsModalOpen(true);
+      setIsError(false);
 
-      // Send file and deckName to the server
       const uploadUrl = await generateUploadURL({
         fileName: `${deckName}.mp4`,
       });
@@ -119,11 +111,10 @@ const GeneratePage = () => {
 
       setPolling(true);
 
-      // Poll for the completion of the deck
       const deckResponse = await pollForDeckCompletion(deckName);
       setPolling(false);
 
-      setIsModalOpen(false); // Close modal
+      setIsModalOpen(false);
       navigate(`/flashcards/${deckName}`, {
         state: {
           deckResponse,
@@ -135,7 +126,7 @@ const GeneratePage = () => {
         "An error occurred during the process. Please try again."
       );
       setPolling(false);
-      setIsError(true); // Set error state for modal
+      setIsError(true);
     }
   };
 
@@ -144,11 +135,13 @@ const GeneratePage = () => {
       <h1 className="text-2xl font-bold mb-5">Generate Flashcard from Video</h1>
 
       <div className="mx-[180px] my-20">
-        <div className={`
+        <div
+          className={`
           rounded-xl bg-white border-2 border-dashed border-[#edeff5] 
           p-8 text-center transition-all cursor-pointer
-          ${polling ? 'bg-[#edeff5] border-[#edeff5]' : ''}
-        `}>
+          ${polling ? "bg-[#edeff5] border-[#edeff5]" : ""}
+        `}
+        >
           {!file ? (
             <>
               <p className="text-base font-medium text-[#1a1a1a] mb-2">
@@ -157,12 +150,14 @@ const GeneratePage = () => {
               <p className="text-sm text-[#666666] mb-4">
                 Supported formats: .mp4, .wav, .mp3, .flac, .ogg
               </p>
-              <label className="
+              <label
+                className="
                 inline-block px-4 py-2 rounded-xl bg-white 
                 border-2 border-[#edeff5] text-[#1a1a1a] 
                 text-sm font-medium cursor-pointer 
                 transition-all hover:bg-[#edeff5]
-              ">
+              "
+              >
                 <input
                   type="file"
                   onChange={handleFileChange}
@@ -174,10 +169,12 @@ const GeneratePage = () => {
             </>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="
+              <div
+                className="
                 w-12 h-12 bg-[#f0f0f0] flex items-center justify-center 
                 rounded-xl text-2xl text-[#666666] flex-shrink-0
-              ">
+              "
+              >
                 <FontAwesomeIcon icon={faFile} />
               </div>
               <span className="flex-1 text-sm font-semibold text-[#1a1a1a] text-left">
@@ -186,7 +183,7 @@ const GeneratePage = () => {
               <span className="text-sm text-[#666666]">
                 {(file.size / (1024 * 1024)).toFixed(1)} MB
               </span>
-              <button 
+              <button
                 className="p-1 text-[#666666] hover:text-[#ff4444]"
                 onClick={handleRemoveFile}
               >
@@ -211,7 +208,7 @@ const GeneratePage = () => {
             w-full p-4 text-base border-2 border-[#edeff5] 
             rounded-xl bg-white transition-all box-border
             focus:outline-none focus:border-[#007aff]
-            ${!file ? 'bg-[#f5f5f5] cursor-not-allowed' : ''}
+            ${!file ? "bg-[#f5f5f5] cursor-not-allowed" : ""}
           `}
           disabled={!file}
         />
@@ -232,27 +229,29 @@ const GeneratePage = () => {
         </button>
       </div>
 
-      {uploadStatus && (
-        <p className="text-center">{uploadStatus}</p>
-      )}
+      {uploadStatus && <p className="text-center">{uploadStatus}</p>}
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="
+        <div
+          className="
           fixed inset-0 bg-black/60 
           flex justify-center items-center z-50
-        ">
-          <div className="
+        "
+        >
+          <div
+            className="
             flex flex-col items-center justify-center text-center 
             p-8 bg-white rounded-xl shadow-lg
-          ">
+          "
+          >
             {isError ? (
               <>
                 <h2 className="text-2xl text-[#333] mb-2">Error Occurred</h2>
                 <p className="text-base text-[#666]">
                   An error occurred during the process. Please try again.
                 </p>
-                <button 
+                <button
                   className="
                     mt-4 px-6 py-3 rounded-xl bg-[#4255ff] 
                     text-white border-none text-base font-medium 
