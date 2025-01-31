@@ -158,10 +158,13 @@ const GeneratePage = () => {
           <div
             className={`
               rounded-lg border-2 border-dashed
-              p-4 sm:p-8 text-center transition-all
-              ${!file ? "hover:border-primary cursor-pointer" : ""}
+              p-4 sm:p-8 text-center transition-all cursor-pointer
+              ${!file ? "hover:border-primary" : ""}
               ${polling ? "bg-muted" : ""}
             `}
+            onClick={() =>
+              !file && document.getElementById("file-upload")?.click()
+            }
           >
             {!file ? (
               <div className="space-y-3 sm:space-y-4">
@@ -176,19 +179,13 @@ const GeneratePage = () => {
                     Supported formats: .mp4, .wav, .mp3, .flac, .ogg
                   </p>
                 </div>
-                <Label
-                  htmlFor="file-upload"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer text-sm sm:text-base"
-                >
-                  <input
-                    id="file-upload"
-                    type="file"
-                    onChange={handleFileChange}
-                    accept=".mp4,.wav,.mp3,.flac,.ogg"
-                    className="hidden"
-                  />
-                  Browse files
-                </Label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".mp4,.wav,.mp3,.flac,.ogg"
+                  className="hidden"
+                />
               </div>
             ) : (
               <div className="flex items-center gap-3 sm:gap-4">
