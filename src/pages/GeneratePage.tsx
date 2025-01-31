@@ -1,8 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateUploadURL, checkDeckStatus } from "../api/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFile } from "@fortawesome/free-solid-svg-icons";
+import { Upload, X, FileIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import loading1 from "../assets/loading_1.svg";
 import loading2 from "../assets/loading_2.svg";
 import loading3 from "../assets/loading_3.svg";
@@ -131,155 +147,142 @@ const GeneratePage = () => {
   };
 
   return (
-    <div className="font-inter p-5">
-      <h1 className="text-2xl font-bold mb-5">Generate Flashcard from Video</h1>
+    <div className="container mx-auto py-6 px-4 sm:py-10 sm:px-6 max-w-4xl min-h-[calc(100vh-4rem)]">
+      <CardHeader className="px-0 space-y-2">
+        <CardTitle className="text-2xl sm:text-3xl font-bold">
+          Generate Flashcard from Video
+        </CardTitle>
+        <CardDescription className="text-sm sm:text-base">
+          Upload your video or audio file to create AI-powered flashcards
+        </CardDescription>
+      </CardHeader>
 
-      <div className="mx-[180px] my-20">
-        <div
-          className={`
-          rounded-xl bg-white border-2 border-dashed border-[#edeff5] 
-          p-8 text-center transition-all cursor-pointer
-          ${polling ? "bg-[#edeff5] border-[#edeff5]" : ""}
-        `}
-        >
-          {!file ? (
-            <>
-              <p className="text-base font-medium text-[#1a1a1a] mb-2">
-                Upload your lecture video or audio
-              </p>
-              <p className="text-sm text-[#666666] mb-4">
-                Supported formats: .mp4, .wav, .mp3, .flac, .ogg
-              </p>
-              <label
-                className="
-                inline-block px-4 py-2 rounded-xl bg-white 
-                border-2 border-[#edeff5] text-[#1a1a1a] 
-                text-sm font-medium cursor-pointer 
-                transition-all hover:bg-[#edeff5]
-              "
-              >
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".mp4,.wav,.mp3,.flac,.ogg"
-                  className="hidden"
-                />
-                Browse files
-              </label>
-            </>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div
-                className="
-                w-12 h-12 bg-[#f0f0f0] flex items-center justify-center 
-                rounded-xl text-2xl text-[#666666] flex-shrink-0
-              "
-              >
-                <FontAwesomeIcon icon={faFile} />
-              </div>
-              <span className="flex-1 text-sm font-semibold text-[#1a1a1a] text-left">
-                {file.name}
-              </span>
-              <span className="text-sm text-[#666666]">
-                {(file.size / (1024 * 1024)).toFixed(1)} MB
-              </span>
-              <button
-                className="p-1 text-[#666666] hover:text-[#ff4444]"
-                onClick={handleRemoveFile}
-              >
-                Remove
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mx-[180px] my-6">
-        <label className="block text-base font-semibold mb-4 text-[#1a1a1a]">
-          Deck Name
-          <span className="text-[#F83446]">*</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Enter deck name"
-          value={deckName}
-          onChange={handleDeckNameChange}
-          className={`
-            w-full p-4 text-base border-2 border-[#edeff5] 
-            rounded-xl bg-white transition-all box-border
-            focus:outline-none focus:border-[#007aff]
-            ${!file ? "bg-[#f5f5f5] cursor-not-allowed" : ""}
-          `}
-          disabled={!file}
-        />
-      </div>
-
-      <div className="flex justify-end mx-[180px] my-6">
-        <button
-          className={`
-            px-6 py-3 rounded-xl bg-[#4255ff] text-white 
-            border-none text-base font-medium cursor-pointer 
-            transition-all hover:opacity-90
-            disabled:bg-[#a0aaff] disabled:cursor-not-allowed
-          `}
-          onClick={handleGenerate}
-          disabled={!file || !deckName.trim() || polling}
-        >
-          {polling ? "Generating..." : "Generate"}
-        </button>
-      </div>
-
-      {uploadStatus && <p className="text-center">{uploadStatus}</p>}
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div
-          className="
-          fixed inset-0 bg-black/60 
-          flex justify-center items-center z-50
-        "
-        >
+      <Card className="mt-6 sm:mt-8">
+        <CardContent className="pt-4 sm:pt-6">
           <div
-            className="
-            flex flex-col items-center justify-center text-center 
-            p-8 bg-white rounded-xl shadow-lg
-          "
+            className={`
+              rounded-lg border-2 border-dashed
+              p-4 sm:p-8 text-center transition-all
+              ${!file ? 'hover:border-primary cursor-pointer' : ''}
+              ${polling ? 'bg-muted' : ''}
+            `}
           >
-            {isError ? (
-              <>
-                <h2 className="text-2xl text-[#333] mb-2">Error Occurred</h2>
-                <p className="text-base text-[#666]">
+            {!file ? (
+              <div className="space-y-3 sm:space-y-4">
+                <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                </div>
+                <div className="space-y-1 sm:space-y-2">
+                  <h3 className="font-semibold text-sm sm:text-base">Upload your lecture video or audio</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Supported formats: .mp4, .wav, .mp3, .flac, .ogg
+                  </p>
+                </div>
+                <Label
+                  htmlFor="file-upload"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer text-sm sm:text-base"
+                >
+                  <input
+                    id="file-upload"
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".mp4,.wav,.mp3,.flac,.ogg"
+                    className="hidden"
+                  />
+                  Browse files
+                </Label>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <FileIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="font-medium truncate text-sm sm:text-base">{file.name}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {(file.size / (1024 * 1024)).toFixed(1)} MB
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRemoveFile}
+                  className="text-muted-foreground hover:text-destructive h-8 w-8 sm:h-10 sm:w-10"
+                >
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 sm:mt-8 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="deck-name" className="text-sm sm:text-base">
+                Deck Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="deck-name"
+                placeholder="Enter deck name"
+                value={deckName}
+                onChange={handleDeckNameChange}
+                disabled={!file}
+                className="text-sm sm:text-base h-9 sm:h-10"
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button
+                onClick={handleGenerate}
+                disabled={!file || !deckName.trim() || polling}
+                className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10"
+              >
+                {polling ? "Generating..." : "Generate"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md mx-4 sm:mx-auto">
+          {isError ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-lg sm:text-xl">Error Occurred</DialogTitle>
+                <DialogDescription className="text-sm sm:text-base">
                   An error occurred during the process. Please try again.
-                </p>
-                <button
-                  className="
-                    mt-4 px-6 py-3 rounded-xl bg-[#4255ff] 
-                    text-white border-none text-base font-medium 
-                    cursor-pointer transition-all hover:opacity-90
-                  "
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end">
+                <Button 
                   onClick={handleModalClose}
+                  className="text-sm sm:text-base h-9 sm:h-10"
                 >
                   Go Back
-                </button>
-              </>
-            ) : (
-              <>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col items-center space-y-4">
                 <img
                   src={images[imageIndex]}
                   alt={`Loading animation ${imageIndex + 1}`}
-                  className="w-[100px] mb-5 transition-opacity duration-300 opacity-100"
+                  className="w-20 sm:w-24 transition-opacity duration-300"
                 />
-                <h2 className="text-2xl text-[#4255ff] mb-2">
-                  Generating your flashcard set...
-                </h2>
-                <p className="text-base text-[#666]">
-                  This may take a while depending on the size of your upload
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                <DialogHeader>
+                  <DialogTitle className="text-center text-primary text-lg sm:text-xl">
+                    Generating your flashcard set...
+                  </DialogTitle>
+                  <DialogDescription className="text-center text-sm sm:text-base">
+                    This may take a while depending on the size of your upload
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
