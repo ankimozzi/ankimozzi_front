@@ -7,27 +7,30 @@ import Header from "./components/Header.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import LoginView from "./pages/LoginView.tsx";
 import SignupView from "./pages/SignupView.tsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App = () => {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/decks" element={<DeckListView />} />
-            <Route path="/generate" element={<GeneratePage />} />
-            <Route path="/flashcards/:deckId" element={<FlashcardView />} />
-            <Route path="/flashcards" element={<FlashcardView />} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Header />
+          <main>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/decks" element={<DeckListView />} />
+              <Route path="/generate" element={<GeneratePage />} />
+              <Route path="/flashcards/:deckId" element={<FlashcardView />} />
+              <Route path="/flashcards" element={<FlashcardView />} />
 
-            <Route path="/login" element={<LoginView />} />
-            <Route path="/signup" element={<SignupView />} />
-          </Routes>
-        </main>
-        <Toaster />
-      </div>
-    </Router>
+              <Route path="/login" element={<LoginView />} />
+              <Route path="/signup" element={<SignupView />} />
+            </Routes>
+          </main>
+          <Toaster />
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
 };
 

@@ -6,74 +6,81 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { motion } from "framer-motion";
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
+import { useGoogleLogin } from "@react-oauth/google";
+import TermsOfServiceModal from "@/components/TermsOfServiceModal";
+import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 
 const LoginView = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: "",
-    password: "",
-  });
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCredentials((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const login = useGoogleLogin({
+    onSuccess: async (response) => {
+      setIsLoading(true);
+      try {
+        // Google OAuth 토큰으로 사용자 정보 가져오기
+        const userInfo = await fetch(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${response.access_token}`,
+            },
+          }
+        );
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+        const user = await userInfo.json();
 
-    try {
-      // API 호출 함수
-      // await loginWithEmail(credentials);
-      toast({
-        title: "로그인 성공!",
-        description: "환영합니다.",
-        duration: 2000,
-      });
-      navigate("/");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "로그인 실패",
-        description: "이메일 또는 비밀번호를 확인해주세요.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        // 백엔드로 토큰 전송 및 로그인 처리
+        const backendResponse = await fetch("YOUR_BACKEND_URL/auth/google", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: response.access_token,
+            email: user.email,
+            name: user.name,
+          }),
+        });
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      // API 호출 함수
-      // await loginWithGoogle();
-      toast({
-        title: "로그인 성공!",
-        description: "환영합니다.",
-        duration: 2000,
-      });
-      navigate("/");
-    } catch (error) {
+        if (!backendResponse.ok) {
+          throw new Error("Login failed");
+        }
+
+        const { token } = await backendResponse.json();
+
+        // 토큰 저장
+        localStorage.setItem("token", token);
+
+        toast({
+          title: "로그인 성공!",
+          description: "환영합니다.",
+          duration: 2000,
+        });
+
+        navigate("/");
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "로그인 실패",
+          description: "구글 로그인에 실패했습니다. 다시 시도해주세요.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
       toast({
         variant: "destructive",
         title: "로그인 실패",
         description: "구글 로그인에 실패했습니다. 다시 시도해주세요.",
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -91,7 +98,7 @@ const LoginView = () => {
           <Button
             variant="outline"
             className="w-full hover:bg-gray-50"
-            onClick={handleGoogleLogin}
+            onClick={() => login()}
             disabled={isLoading}
           >
             <FontAwesomeIcon
@@ -114,16 +121,31 @@ const LoginView = () => {
 
         <div className="mt-8 text-center text-xs text-gray-400">
           로그인 시{" "}
-          <a href="#" className="text-blue-600 hover:underline">
+          <button
+            onClick={() => setShowTerms(true)}
+            className="text-blue-600 hover:underline"
+          >
             이용약관
-          </a>
+          </button>
           과{" "}
-          <a href="#" className="text-blue-600 hover:underline">
-            개인정보 처리방침
-          </a>
+          <button
+            onClick={() => setShowPrivacyPolicy(true)}
+            className="text-blue-600 hover:underline"
+          >
+            개인정보처리방침
+          </button>
           에 동의하게 됩니다
         </div>
       </motion.div>
+
+      <TermsOfServiceModal
+        isOpen={showTerms}
+        onClose={() => setShowTerms(false)}
+      />
+      <PrivacyPolicyModal
+        isOpen={showPrivacyPolicy}
+        onClose={() => setShowPrivacyPolicy(false)}
+      />
     </div>
   );
 };
