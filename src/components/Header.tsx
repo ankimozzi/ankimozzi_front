@@ -24,6 +24,12 @@ const Header = () => {
   }, []);
 
   const isActive = (path: string) => {
+    if (path === "/decks") {
+      return (
+        location.pathname === "/decks" ||
+        location.pathname.startsWith("/flashcards")
+      );
+    }
     return location.pathname === path;
   };
 
