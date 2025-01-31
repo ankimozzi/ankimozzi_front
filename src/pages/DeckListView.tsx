@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchCategories, fetchDeck, fetchDeckList } from "../api/api";
 import Loading from "../components/Loading";
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { PlusCircle } from "lucide-react";
 
 // API 응답 타입
 interface ApiResponse {
@@ -26,7 +29,7 @@ interface Deck {
   url: string;
 }
 
-const Home = () => {
+const DeckListView = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [deckList, setDeckList] = useState<Deck[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -117,72 +120,87 @@ const Home = () => {
   };
 
   return (
-    <div className="font-inter p-5">
-      {isLoading && <Loading message="Loading flashcards..." />}
+    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
+      <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
+        {isLoading && <Loading message="Loading flashcards..." />}
 
-      <header className="flex justify-between items-center mb-5">
-        <h1 className="text-2xl font-bold">Video Flashcards</h1>
-        <button
-          className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-base rounded transition-colors duration-300"
-          onClick={() => navigate("/generate")}
-          aria-label="Generate new flashcards"
-        >
-          + Generate
-        </button>
-      </header>
-
-      <nav className="flex justify-start gap-4 mb-8">
-        {categories.map((category, index) => (
-          <button
-            key={index}
-            className={`relative text-base font-semibold text-primary hover:text-primary-dark transition-colors duration-300
-              ${
-                selectedCategory === category
-                  ? "after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-1 after:bg-primary"
-                  : ""
-              }`}
-            onClick={() => handleCategoryClick(category)}
-            aria-label={`Select ${category} category`}
-            aria-selected={selectedCategory === category}
-          >
-            {category}
-          </button>
-        ))}
-      </nav>
-
-      <div className="bg-gray-50 p-5 -mx-5 min-h-[calc(100vh-250px)] relative">
-        <h2 className="mb-4 text-lg font-semibold">Flashcard Sets</h2>
-        {!isLoading &&
-          (deckList.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {deckList.map((deck, index) => (
-                <div
-                  key={index}
-                  className="bg-white border-2 border-gray-100 rounded-xl p-8 text-left cursor-pointer
-                    hover:border-primary-light active:border-primary transition-all duration-300"
-                  onClick={() => handleDeckClick(deck)}
-                  onKeyDown={(e) => e.key === "Enter" && handleDeckClick(deck)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`Open flashcard deck: ${deck.question}`}
-                >
-                  <h3 className="text-lg font-medium text-gray-800 m-0">
-                    {deck.question}
-                  </h3>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-              text-lg text-gray-500 text-center pointer-events-none"
-            >
-              No decks available
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Video Flashcards
+            </h1>
+            <p className="mt-1 text-sm sm:text-base text-gray-500">
+              Select a category to view flashcards
             </p>
-          ))}
+          </div>
+          <Button
+            onClick={() => navigate("/generate")}
+            className="w-full sm:w-auto h-10 text-sm sm:text-base"
+          >
+            <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            Generate
+          </Button>
+        </div>
+
+        <ScrollArea className="w-full whitespace-nowrap rounded-lg border bg-white p-4 mb-6">
+          <div className="flex space-x-4">
+            {categories.map((category, index) => (
+              <Button
+                key={index}
+                variant={selectedCategory === category ? "default" : "ghost"}
+                className={`flex-shrink-0 h-9 sm:h-10 px-4 sm:px-6 text-sm sm:text-base
+                  ${
+                    selectedCategory === category
+                      ? "bg-primary text-primary-foreground"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                onClick={() => handleCategoryClick(category)}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+
+        <div className="space-y-6">
+          {!isLoading &&
+            (deckList.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {deckList.map((deck, index) => (
+                  <button
+                    key={index}
+                    className="w-full text-left bg-white rounded-xl p-6 shadow-sm hover:shadow-md
+                      border border-gray-100 transition-all duration-200"
+                    onClick={() => handleDeckClick(deck)}
+                  >
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">
+                      {deck.question}
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Click to view flashcards
+                    </p>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-base sm:text-lg text-gray-500">
+                  No decks available in this category
+                </p>
+                <Button
+                  onClick={() => navigate("/generate")}
+                  variant="outline"
+                  className="mt-4"
+                >
+                  Create your first deck
+                </Button>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default DeckListView;
