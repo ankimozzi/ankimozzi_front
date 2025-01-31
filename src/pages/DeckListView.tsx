@@ -30,7 +30,6 @@ const Home = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [deckList, setDeckList] = useState<Deck[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [deckData, setDeckData] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -40,7 +39,7 @@ const Home = () => {
         setIsLoading(true);
         const response = await fetchCategories();
         console.log("Categories Response:", response); // 디버깅용
-        
+
         const categoriesData = JSON.parse(response.body);
         setCategories(categoriesData);
 
@@ -48,11 +47,11 @@ const Home = () => {
           setSelectedCategory(categoriesData[0]);
           const decksResponse = await fetchDeckList(categoriesData[0]);
           console.log("Decks Response:", decksResponse); // 디버깅용
-          
+
           const parsedDecks = JSON.parse(decksResponse.body);
           if (Array.isArray(parsedDecks) && parsedDecks.length > 0) {
             const selectedDeck = parsedDecks.find(
-              deck => deck.category === categoriesData[0]
+              (deck) => deck.category === categoriesData[0]
             );
             if (selectedDeck?.question_list) {
               setDeckList(selectedDeck.question_list);
@@ -97,20 +96,20 @@ const Home = () => {
   const handleDeckClick = async (deck: Deck) => {
     const match = deck.question.match(/-(.+?)\.mp4/);
     const extractedString = match ? match[1] : null;
-    
+
     try {
       if (!extractedString) return;
-      
-      const response = await fetchDeck(extractedString) as ApiResponse;
+
+      const response = (await fetchDeck(extractedString)) as ApiResponse;
       console.log("Deck API Response:", response); // 디버깅 추가
-      
+
       const jsonObject = JSON.parse(response.body);
       console.log("Parsed JSON:", jsonObject); // 디버깅 추가
 
       navigate(`/flashcards/${extractedString}`, {
-        state: { 
-          deckResponse: jsonObject 
-        }
+        state: {
+          deckResponse: jsonObject,
+        },
       });
     } catch (error) {
       console.error("Error in handleDeckClick:", error);

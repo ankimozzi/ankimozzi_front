@@ -8,9 +8,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: "./src/main.tsx",
+        main: path.resolve(__dirname, "index.html"),
       },
     },
+    outDir: "dist",
   },
   resolve: {
     alias: {
