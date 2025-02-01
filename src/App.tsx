@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import LoginView from "./pages/LoginView.tsx";
 import SignupView from "./pages/SignupView.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import ProfileView from "./pages/ProfileView.tsx";
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
 
               <Route path="/login" element={<LoginView />} />
               <Route path="/signup" element={<SignupView />} />
+              <Route path="/profile" element={<ProfileView />} />
             </Routes>
           </main>
           <Toaster />

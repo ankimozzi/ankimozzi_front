@@ -63,11 +63,18 @@ const Header = () => {
           <DropdownMenuTrigger asChild>
             <button className="rounded-lg overflow-hidden hover:ring-2 hover:ring-gray-200 transition-all">
               <img
-                src={user.picture || "https://placehold.co/400x400"}
+                src={
+                  user.picture ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user.name
+                  )}`
+                }
                 alt={user.name}
                 className="w-10 h-10 object-cover rounded-lg"
                 onError={(e) => {
-                  e.currentTarget.src = "https://placehold.co/400x400";
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user.name
+                  )}`;
                 }}
               />
             </button>
@@ -78,6 +85,9 @@ const Header = () => {
               <p className="text-xs text-gray-500">{user.email}</p>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/profile")}>
+              마이페이지
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
