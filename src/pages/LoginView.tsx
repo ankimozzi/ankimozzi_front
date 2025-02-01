@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { useGoogleLogin } from "@react-oauth/google";
 import TermsOfServiceModal from "@/components/TermsOfServiceModal";
 import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const LoginView = () => {
   const navigate = useNavigate();
@@ -17,11 +18,40 @@ const LoginView = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
+  /*   1. 유저가 OAuth 버튼 클릭
+    2. 구글에서 제공하는 OAuth 정보(access_token) 받아오기
+    response 객체
+    {
+        access_token: "ya29.a0AfB_...", // Google OAuth 토큰
+        expires_in: 3599,              // 토큰 만료 시간
+        scope: "email profile ...",    // 권한 범위
+        token_type: "Bearer"          // 토큰 타입
+    }
+3. access_token으로 구글 API에서 사용자 정보 가져오기
+
+const user = await authApi.getGoogleUserInfo(response.access_token);
+// user 객체
+{
+  email: "user@gmail.com",
+  name: "홍길동",
+  picture: "https://..." // 선택적
+}
+
+4. 백엔드로 토큰 전송 및 로그인 처리(JWS 토큰 받아서 localStorage에 저장)
+const { token } = await authApi.login({
+  token: response.access_token,
+  email: user.email,
+  name: user.name
+});
+
+// JWT 토큰을 localStorage에 저장
+localStorage.setItem("token", token);
+
+*/
   const login = useGoogleLogin({
     onSuccess: async (response) => {
       setIsLoading(true);
       try {
-        // Google OAuth 토큰으로 사용자 정보 가져오기
         const userInfo = await fetch(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
@@ -33,37 +63,27 @@ const LoginView = () => {
 
         const user = await userInfo.json();
 
-        // 백엔드로 토큰 전송 및 로그인 처리
-        const backendResponse = await fetch("YOUR_BACKEND_URL/auth/google", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: response.access_token,
-            email: user.email,
-            name: user.name,
-          }),
+        // 프로필 이미지 URL 수정
+        const pictureUrl = user.picture?.replace("=s96-c", ""); // 크기 파라미터 완전 제거
+
+        useAuthStore.getState().setUser({
+          email: user.email,
+          name: user.name,
+          picture:
+            pictureUrl ||
+            "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name), // 대체 이미지 서비스 사용
         });
 
-        if (!backendResponse.ok) {
-          throw new Error("Login failed");
-        }
-
-        const { token } = await backendResponse.json();
-
-        // 토큰 저장
-        localStorage.setItem("token", token);
+        localStorage.setItem("token", response.access_token);
 
         toast({
           title: "로그인 성공!",
-          description: "환영합니다.",
-          duration: 2000,
+          description: `환영합니다, ${user.name}님`,
         });
 
         navigate("/");
       } catch (error) {
-        console.error(error);
+        console.error("Login Error:", error);
         toast({
           variant: "destructive",
           title: "로그인 실패",
@@ -80,6 +100,7 @@ const LoginView = () => {
         description: "구글 로그인에 실패했습니다. 다시 시도해주세요.",
       });
     },
+    flow: "implicit",
   });
 
   return (

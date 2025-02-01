@@ -20,7 +20,7 @@ const SignupView = () => {
     onSuccess: async (response) => {
       setIsLoading(true);
       try {
-        // Google OAuth 토큰으로 사용자 정보 가져오기
+        // Google OAuth 사용자 정보 가져오기
         const userInfo = await fetch(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
@@ -32,29 +32,32 @@ const SignupView = () => {
 
         const user = await userInfo.json();
 
-        // 백엔드로 토큰 전송 및 회원가입 처리
-        const backendResponse = await fetch("YOUR_BACKEND_URL/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: response.access_token,
-            email: user.email,
-            name: user.name,
-          }),
-        });
-
-        if (!backendResponse.ok) {
-          throw new Error("Signup failed");
+        // 이미 가입된 사용자인지 확인
+        const existingUser = localStorage.getItem("user");
+        if (existingUser && JSON.parse(existingUser).email === user.email) {
+          toast({
+            variant: "destructive",
+            title: "회원가입 실패",
+            description: "이미 가입된 이메일입니다. 로그인을 시도해주세요.",
+          });
+          navigate("/login");
+          return;
         }
 
-        const { token } = await backendResponse.json();
-        localStorage.setItem("token", token);
+        // 개발용 임시 저장
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: user.email,
+            name: user.name,
+            picture: user.picture,
+            createdAt: new Date().toISOString(), // 가입 시점 추가
+          })
+        );
 
         toast({
           title: "회원가입 성공!",
-          description: "환영합니다.",
+          description: `환영합니다, ${user.name}님`,
           duration: 2000,
         });
 
