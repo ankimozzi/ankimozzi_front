@@ -9,6 +9,7 @@ import LoginView from "./pages/LoginView.tsx";
 import SignupView from "./pages/SignupView.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import ProfileView from "./pages/ProfileView.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 const App = () => {
   return (
@@ -19,14 +20,27 @@ const App = () => {
           <main>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route
+                path="/generate"
+                element={
+                  <ProtectedRoute>
+                    <GeneratePage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/decks" element={<DeckListView />} />
-              <Route path="/generate" element={<GeneratePage />} />
               <Route path="/flashcards/:deckId" element={<FlashcardView />} />
               <Route path="/flashcards" element={<FlashcardView />} />
-
               <Route path="/login" element={<LoginView />} />
               <Route path="/signup" element={<SignupView />} />
-              <Route path="/profile" element={<ProfileView />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfileView />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </main>
           <Toaster />
