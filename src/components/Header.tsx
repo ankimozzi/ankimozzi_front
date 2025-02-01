@@ -49,7 +49,7 @@ const Header = () => {
   const navigationLinks = [
     { path: "/", label: "Home" },
     { path: "/generate", label: "Generate" },
-    { path: "/decks", label: "My Decks" },
+    { path: "/decks", label: "Decks" },
   ];
 
   const handleNavigate = (path: string) => {
@@ -230,11 +230,18 @@ const Header = () => {
                   <div className="space-y-1">
                     <div className="p-3 flex items-center space-x-3">
                       <img
-                        src={user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
+                        src={
+                          user.picture ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            user.name
+                          )}`
+                        }
                         alt={user.name}
                         className="w-10 h-10 rounded-lg"
                         onError={(e) => {
-                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`;
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            user.name
+                          )}`;
                         }}
                       />
                       <div>
