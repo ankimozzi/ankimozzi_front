@@ -17,7 +17,7 @@ const FeatureCard = ({
   >
     <div className="text-2xl mb-2">{icon}</div>
     <h3 className="text-xl font-bold mb-2">{title}</h3>
-    <p className="text-gray-300">{description}</p>
+    <p className="text-gray-300 whitespace-normal break-keep">{description}</p>
   </motion.div>
 );
 
@@ -52,7 +52,7 @@ const TeamMember = ({
   >
     <h3 className="text-xl font-bold mb-2">{name}</h3>
     <p className="text-blue-400 mb-2">{role}</p>
-    <p className="text-gray-300">{description}</p>
+    <p className="text-gray-300 whitespace-normal break-keep">{description}</p>
   </motion.div>
 );
 
@@ -64,15 +64,16 @@ const Home = () => {
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl font-bold mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 px-2 leading-tight"
         >
-          AI가 만드는 자동 퀴즈 덱, Duel 🚀
+          AI가 만드는 자동 퀴즈 덱,{" "}
+          <span className="block sm:inline">Duel 🚀</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-xl text-gray-300 mb-8"
+          className="text-xl text-gray-300 mb-8 whitespace-normal break-keep"
         >
           학습 콘텐츠 제작, 아직도 수작업으로 하시나요?
         </motion.p>
@@ -90,7 +91,7 @@ const Home = () => {
 
       {/* 타겟 사용자 섹션 */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold mb-8 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center whitespace-normal break-keep">
           ✨ 이런 분들을 위해 만들었어요
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
@@ -160,7 +161,7 @@ const Home = () => {
           <TeamMember
             name="나덕룡 (Nathan)"
             role="Front Engineer, Market Research Analyst"
-            description="프론트 개발 & 시장 조사, 비즈니스 전략 수립"
+            description="프론트엔드 개발 & 시장 조사, 비즈니스 전략 수립"
             linkedIn="deokryongna"
           />
         </div>

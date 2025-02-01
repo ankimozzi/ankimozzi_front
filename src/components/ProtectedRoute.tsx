@@ -13,8 +13,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (!user) {
     toast({
       variant: "destructive",
-      title: "접근 제한",
-      description: "로그인이 필요한 서비스입니다.",
+      title: "Access Denied",
+      description: "Please login to access this service.",
     });
     return <Navigate to="/login" replace />;
   }
@@ -22,4 +22,4 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;
