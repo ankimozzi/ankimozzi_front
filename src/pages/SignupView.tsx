@@ -83,32 +83,36 @@ const SignupView = () => {
   });
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+    <div className="h-[calc(100vh-5rem)] bg-white flex items-center justify-center px-4 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full space-y-8 p-8 bg-white border rounded-xl shadow-lg"
+        className="w-full h-full sm:h-auto sm:max-w-md space-y-6 sm:space-y-8 sm:p-8 p-4 bg-white sm:border sm:rounded-xl sm:shadow-lg flex flex-col justify-center"
       >
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">회원가입</h2>
-          <p className="mt-2 text-gray-500">Ankimozzi에 오신 것을 환영합니다</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            회원가입
+          </h2>
+          <p className="mt-2 text-sm sm:text-base text-gray-500">
+            Ankimozzi에 오신 것을 환영합니다
+          </p>
         </div>
 
         <div className="space-y-4">
           <Button
             variant="outline"
-            className="w-full hover:bg-gray-50"
+            className="w-full hover:bg-gray-50 text-sm sm:text-base py-6 sm:py-4"
             onClick={() => handleGoogleSignup()}
             disabled={isLoading}
           >
             <FontAwesomeIcon
               icon={faGoogleBrand as any}
-              className="mr-2 h-4 w-4"
+              className="mr-2 h-3 w-3 sm:h-4 sm:w-4"
             />
             {isLoading ? "처리 중..." : "Google로 회원가입"}
           </Button>
 
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-xs sm:text-sm text-gray-500">
             이미 계정이 있으신가요?{" "}
             <button
               onClick={() => navigate("/login")}
@@ -119,7 +123,7 @@ const SignupView = () => {
           </div>
         </div>
 
-        <div className="mt-8 text-center text-xs text-gray-400">
+        <div className="mt-6 sm:mt-8 text-center text-xs text-gray-400">
           로그인 시{" "}
           <button
             onClick={() => setShowTerms(true)}
