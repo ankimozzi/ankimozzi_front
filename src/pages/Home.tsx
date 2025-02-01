@@ -155,7 +155,7 @@ const Home = () => {
           <TeamMember
             name="김동연"
             role="Full-stack Engineer"
-            description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현"
+            description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현 아키텍쳐 설계"
             linkedIn="yeonnnn"
           />
           <TeamMember
