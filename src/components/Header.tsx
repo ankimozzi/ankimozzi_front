@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   Sheet,
   SheetContent,
@@ -9,10 +10,20 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, logout } = useAuthStore();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,6 +51,78 @@ const Header = () => {
     { path: "/generate", label: "Generate" },
     { path: "/decks", label: "My Decks" },
   ];
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setIsSheetOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsSheetOpen(false);
+    navigate("/login");
+  };
+
+  const AuthButtons = () => {
+    if (user) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="rounded-lg overflow-hidden hover:ring-2 hover:ring-gray-200 transition-all">
+              <img
+                src={
+                  user.picture ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user.name
+                  )}`
+                }
+                alt={user.name}
+                className="w-10 h-10 object-cover rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user.name
+                  )}`;
+                }}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium">{user.name}</p>
+              <p className="text-xs text-gray-500">{user.email}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleNavigate("/profile")}>
+              My Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <>
+        <button
+          className={`text-base font-semibold transition-colors
+            ${
+              isDarkTheme
+                ? "text-gray-300 hover:text-white"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          onClick={() => handleNavigate("/login")}
+        >
+          Login
+        </button>
+        <Button
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={() => handleNavigate("/signup")}
+        >
+          Sign up
+        </Button>
+      </>
+    );
+  };
 
   return (
     <header
@@ -97,25 +180,13 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* 데스크톱 로그인/회원가입 버튼 */}
+        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          {/* <button
-            className={`text-base font-semibold transition-colors
-              ${
-                isDarkTheme
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-          >
-            Login
-          </button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            Sign up
-          </Button> */}
+          <AuthButtons />
         </div>
 
-        {/* 모바일 메뉴 버튼 */}
-        <Sheet>
+        {/* 모바일 메뉴 */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
@@ -134,32 +205,73 @@ const Header = () => {
             <SheetHeader>
               <SheetTitle className="text-left">Menu</SheetTitle>
             </SheetHeader>
-            <div className="mt-8 flex flex-col space-y-4">
-              {navigationLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`text-lg font-semibold transition-colors
-                    ${
-                      isActive(link.path)
-                        ? "text-blue-600"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              {/* <div className="pt-4 border-t">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-lg font-semibold text-gray-600 hover:text-gray-900"
-                >
-                  Login
-                </Button>
-                <Button className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white">
-                  Sign up
-                </Button>
-              </div> */}
+            <div className="mt-8 flex flex-col h-[calc(100vh-6rem)]">
+              <div className="space-y-1">
+                {navigationLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsSheetOpen(false)}
+                    className={`w-full p-3 text-lg font-semibold transition-colors flex items-center
+                      ${
+                        isActive(link.path)
+                          ? "text-blue-600 bg-blue-50"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                      }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              {user ? (
+                <>
+                  <div className="my-4 border-t border-gray-200" />
+                  <div className="space-y-1">
+                    <div className="p-3 flex items-center space-x-3">
+                      <img
+                        src={user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`;
+                        }}
+                      />
+                      <div>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleNavigate("/profile")}
+                      className="w-full p-3 text-left text-lg font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      My Profile
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full p-3 text-left text-lg font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="mt-auto border-t border-gray-200 pt-4">
+                  <button
+                    onClick={() => handleNavigate("/login")}
+                    className="w-full p-3 text-left text-lg font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => handleNavigate("/signup")}
+                    className="w-full p-3 text-left text-lg font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                  >
+                    Sign up
+                  </button>
+                </div>
+              )}
             </div>
           </SheetContent>
         </Sheet>
