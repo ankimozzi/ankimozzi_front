@@ -64,9 +64,9 @@ const Home = () => {
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 px-2 leading-tight"
+          className="text-4xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 px-2 leading-tight"
         >
-          AI가 만드는 자동 퀴즈 덱,{" "}
+          AI가 만드는 Quizlet 덱,{" "}
           <span className="block sm:inline">Duel 🚀</span>
         </motion.h1>
         <motion.p
@@ -82,10 +82,10 @@ const Home = () => {
           서비스입니다.
         </p>
         <Link
-          to="/generate"
+          to="/decks"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
         >
-          시작하기
+          둘러보기
         </Link>
       </header>
 
