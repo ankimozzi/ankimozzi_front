@@ -172,7 +172,9 @@ const DeckListView = () => {
                     onClick={() => handleDeckClick(deck)}
                   >
                     <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">
-                      {deck.question}
+                      {deck.question
+                        .replace("transcribe-", "")
+                        .replace(".mp4", "")}
                     </h3>
                     <p className="mt-2 text-sm text-gray-500">
                       Click to view flashcards
