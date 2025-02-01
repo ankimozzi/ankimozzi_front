@@ -23,10 +23,10 @@ const Loading = ({
         if (prevProgress >= 90) {
           return prevProgress;
         }
-        const diff = Math.random() * 10;
+        const diff = Math.random() * 2;
         return Math.min(prevProgress + diff, 90);
       });
-    }, 500);
+    }, 100);
 
     return () => {
       clearInterval(timer);
@@ -38,7 +38,7 @@ const Loading = ({
       <div className="bg-white dark:bg-gray-900 rounded-xl p-8 max-w-sm w-full mx-4 text-center shadow-xl">
         <Progress
           value={progress}
-          className={`w-full h-2 transition-all duration-700 ${
+          className={`w-full h-2 transition-all duration-300 ease-out ${
             isComplete ? "bg-muted/20" : ""
           }`}
         />
