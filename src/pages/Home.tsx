@@ -149,19 +149,19 @@ const Home = () => {
           <TeamMember
             name="김기훈"
             role="Backend Engineer"
-            description="확장 가능한 영상 처리 파이프라인 및 아키텍처 설계"
+            description="확장 가능한 영상 처리 파이프라인 개발 및 비용 계산"
             linkedIn="kihoon-noah-kim"
           />
           <TeamMember
             name="김동연"
             role="Full-stack Engineer"
-            description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현 아키텍쳐 설계"
+            description="프론트엔드 개발 & 영상 저장/퀴즈 변환 워크플로우 구현 및 아키텍쳐 설계"
             linkedIn="yeonnnn"
           />
           <TeamMember
             name="나덕룡 (Nathan)"
             role="Front Engineer, Market Research Analyst"
-            description="프론트엔드 개발 & 시장 조사, 비즈니스 전략 수립"
+            description="프론트엔드 개발 & 시장 조사, 비즈니스 전략 수립 및 비용 계산"
             linkedIn="deokryongna"
           />
         </div>
