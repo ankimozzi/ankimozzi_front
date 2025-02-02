@@ -1,18 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchCategories, fetchDeck, fetchDeckList } from "../api/api";
 import Loading from "../components/Loading";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PlusCircle } from "lucide-react";
-import { useLoadingStore } from "@/store/useLoadingStore";
-
-// API 응답 타입
-interface ApiResponse {
-  statusCode: number;
-  body: string;
-}
-
+import { useCategories } from "@/hooks/queries/useCategories";
+import { useDeckList } from "@/hooks/queries/useDeckList";
+import { useDeckClick } from "@/hooks/queries/useDeckClick";
 // 덱 리스트 아이템 타입
 interface QuestionItem {
   question: string;
@@ -31,95 +25,72 @@ interface Deck {
 }
 
 const DeckListView = () => {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [deckList, setDeckList] = useState<Deck[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const { startLoading, completeLoading, isLoading, isComplete } =
-    useLoadingStore();
   const navigate = useNavigate();
 
+  // React Query 훅 사용
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
+    useCategories();
+
+  const { data: deckListData, isLoading: isDeckListLoading } =
+    useDeckList(selectedCategory);
+
+  const { mutateAsync: fetchDeckData } = useDeckClick();
+
+  // 카테고리 데이터가 로드되면 첫 번째 카테고리 선택
   useEffect(() => {
-    const loadCategories = async () => {
-      startLoading("Loading categories...");
-      try {
-        const response = await fetchCategories();
-        const categoriesData = JSON.parse(response.body);
-        setCategories(categoriesData);
-
-        if (categoriesData.length > 0) {
-          setSelectedCategory(categoriesData[0]);
-          const decksResponse = await fetchDeckList(categoriesData[0]);
-          const parsedDecks = JSON.parse(decksResponse.body);
-          if (Array.isArray(parsedDecks) && parsedDecks.length > 0) {
-            const selectedDeck = parsedDecks.find(
-              (deck) => deck.category === categoriesData[0]
-            );
-            if (selectedDeck?.question_list) {
-              setDeckList(selectedDeck.question_list);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
-        setCategories([]);
-      } finally {
-        completeLoading();
+    if (categoriesData?.body) {
+      const categories = JSON.parse(categoriesData.body);
+      if (categories.length > 0 && !selectedCategory) {
+        setSelectedCategory(categories[0]);
       }
-    };
-    loadCategories();
-  }, []);
-
-  const handleCategoryClick = async (category: string) => {
-    startLoading("Loading flashcards...");
-    setSelectedCategory(category);
-    try {
-      const decksResponse = (await fetchDeckList(category)) as ApiResponse;
-      const parsedDecks = JSON.parse(decksResponse.body) as DeckListItem[];
-      const selectedDeck = parsedDecks.find(
-        (deck) => deck.category === category
-      );
-
-      if (selectedDeck) {
-        setDeckList(selectedDeck.question_list);
-      } else {
-        setDeckList([]);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error fetching decks:", error.message);
-      }
-      setDeckList([]);
-    } finally {
-      completeLoading();
     }
+  }, [categoriesData]);
+
+  // 데이터 파싱 헬퍼 함수들
+  const categories = useMemo(() => {
+    if (!categoriesData?.body) return [];
+    return JSON.parse(categoriesData.body);
+  }, [categoriesData]);
+
+  const deckList = useMemo(() => {
+    if (!deckListData?.body) return [];
+    const parsedDecks = JSON.parse(deckListData.body);
+    const selectedDeck = parsedDecks.find(
+      (deck: DeckListItem) => deck.category === selectedCategory
+    );
+    return selectedDeck?.question_list || [];
+  }, [deckListData, selectedCategory]);
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
   };
 
   const handleDeckClick = async (deck: Deck) => {
     const match = deck.question.match(/-(.+?)\.mp4/);
     const extractedString = match ? match[1] : null;
 
-    try {
-      if (!extractedString) return;
+    if (!extractedString) return;
 
-      startLoading("Loading deck...");
-      const response = (await fetchDeck(extractedString)) as ApiResponse;
-      const jsonObject = JSON.parse(response.body);
+    try {
+      const deckResponse = await fetchDeckData(extractedString);
 
       navigate(`/flashcards/${extractedString}`, {
         state: {
-          deckResponse: jsonObject,
+          deckResponse,
         },
       });
     } catch (error) {
-      console.error("Error in handleDeckClick:", error);
-    } finally {
-      completeLoading();
+      console.error("Error fetching deck:", error);
     }
   };
 
+  // 로딩 상태 통합
+  const isLoading = isCategoriesLoading || isDeckListLoading;
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
-      {isLoading && <Loading isComplete={isComplete} />}
+      {isLoading && <Loading isComplete={false} />}
       <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
@@ -141,7 +112,7 @@ const DeckListView = () => {
 
         <ScrollArea className="w-full whitespace-nowrap rounded-lg border bg-white p-4 mb-6">
           <div className="flex space-x-4">
-            {categories.map((category, index) => (
+            {categories.map((category: string, index: number) => (
               <Button
                 key={index}
                 variant={selectedCategory === category ? "default" : "ghost"}
@@ -164,7 +135,7 @@ const DeckListView = () => {
           {!isLoading &&
             (deckList.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {deckList.map((deck, index) => (
+                {deckList.map((deck: Deck, index: number) => (
                   <button
                     key={index}
                     className="w-full text-left bg-white rounded-xl p-6 shadow-sm hover:shadow-md
