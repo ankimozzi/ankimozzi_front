@@ -21,8 +21,7 @@ import {
 import loading1 from "../assets/loading_1.svg";
 import loading2 from "../assets/loading_2.svg";
 import loading3 from "../assets/loading_3.svg";
-import { useUploadUrl } from "@/hooks/queries/useUploadUrl";
-import { useDeckStatus } from "@/hooks/queries/useDeckStatus";
+import { useUploadUrl, useDeckStatus } from "@/hooks/queries/services";
 
 const GeneratePage = () => {
   const [file, setFile] = useState<File | null>(null);

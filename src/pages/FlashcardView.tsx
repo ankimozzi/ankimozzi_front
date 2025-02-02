@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Document, Paragraph, Packer } from "docx";
 import Loading from "@/components/Loading";
-import { useDeck } from "@/hooks/queries/useDeck";
+import { useDeck } from "@/hooks/queries/services";
 
 interface Flashcard {
   id: number;

@@ -4,9 +4,11 @@ import Loading from "../components/Loading";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PlusCircle } from "lucide-react";
-import { useCategories } from "@/hooks/queries/useCategories";
-import { useDeckList } from "@/hooks/queries/useDeckList";
-import { useDeckClick } from "@/hooks/queries/useDeckClick";
+import {
+  useCategories,
+  useDeckList,
+  useDeckClick,
+} from "@/hooks/queries/services";
 // 덱 리스트 아이템 타입
 interface QuestionItem {
   question: string;

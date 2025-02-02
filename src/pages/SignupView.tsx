@@ -6,80 +6,58 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TermsOfServiceModal from "@/components/TermsOfServiceModal";
 import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin as useGoogleAuth } from "@react-oauth/google";
+import { useGoogleSignup } from "@/hooks/queries/auth";
 import { useToast } from "@/hooks/use-toast";
 
 const SignupView = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
-  const handleGoogleSignup = useGoogleLogin({
-    onSuccess: async (response) => {
-      setIsLoading(true);
-      try {
-        // Google OAuth 사용자 정보 가져오기
-        const userInfo = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${response.access_token}`,
-            },
-          }
-        );
+  const { mutate: handleSignup, isPending } = useGoogleSignup({
+    onSuccess: (data) => {
+      const { userInfo, accessToken } = data;
+      const pictureUrl = userInfo.picture?.replace("=s96-c", "");
 
-        const user = await userInfo.json();
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          email: userInfo.email,
+          name: userInfo.name,
+          picture:
+            pictureUrl ||
+            "https://ui-avatars.com/api/?name=" +
+              encodeURIComponent(userInfo.name),
+          createdAt: new Date().toISOString(),
+        })
+      );
 
-        // 이미 가입된 사용자인지 확인
-        const existingUser = localStorage.getItem("user");
-        if (existingUser && JSON.parse(existingUser).email === user.email) {
-          toast({
-            variant: "destructive",
-            title: "회원가입 실패",
-            description: "이미 가입된 이메일입니다. 로그인을 시도해주세요.",
-          });
-          navigate("/login");
-          return;
-        }
+      toast({
+        title: "회원가입 성공!",
+        description: `환영합니다, ${userInfo.name}님`,
+      });
 
-        // 개발용 임시 저장
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email: user.email,
-            name: user.name,
-            picture: user.picture,
-            createdAt: new Date().toISOString(), // 가입 시점 추가
-          })
-        );
-
-        toast({
-          title: "회원가입 성공!",
-          description: `환영합니다, ${user.name}님`,
-          duration: 2000,
-        });
-
-        navigate("/");
-      } catch (error) {
-        console.error(error);
-        toast({
-          variant: "destructive",
-          title: "회원가입 실패",
-          description: "구글 회원가입에 실패했습니다. 다시 시도해주세요.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      navigate("/");
     },
-    onError: () => {
+    onError: (error) => {
+      if (error.message === "이미 가입된 이메일입니다.") {
+        navigate("/login");
+      }
       toast({
         variant: "destructive",
         title: "회원가입 실패",
-        description: "구글 회원가입에 실패했습니다. 다시 시도해주세요.",
+        description:
+          error.message || "구글 회원가입에 실패했습니다. 다시 시도해주세요.",
       });
     },
+  });
+
+  const login = useGoogleAuth({
+    onSuccess: (response) => handleSignup(response.access_token),
+    flow: "implicit",
   });
 
   return (
@@ -102,14 +80,14 @@ const SignupView = () => {
           <Button
             variant="outline"
             className="w-full hover:bg-gray-50 text-sm sm:text-base py-6 sm:py-4"
-            onClick={() => handleGoogleSignup()}
-            disabled={isLoading}
+            onClick={() => login()}
+            disabled={isPending}
           >
             <FontAwesomeIcon
               icon={faGoogleBrand as any}
               className="mr-2 h-3 w-3 sm:h-4 sm:w-4"
             />
-            {isLoading ? "처리 중..." : "Google로 회원가입"}
+            {isPending ? "처리 중..." : "Google로 회원가입"}
           </Button>
 
           <div className="text-center text-xs sm:text-sm text-gray-500">

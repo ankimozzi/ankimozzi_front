@@ -10,7 +10,7 @@ import { useGoogleLogin as useGoogleAuth } from "@react-oauth/google";
 import TermsOfServiceModal from "@/components/TermsOfServiceModal";
 import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useGoogleLogin } from "@/hooks/queries/useGoogleLogin";
+import { useGoogleLogin } from "@/hooks/queries/auth";
 
 export const LoginView = () => {
   const navigate = useNavigate();
