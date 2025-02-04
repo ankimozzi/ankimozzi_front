@@ -5,6 +5,6 @@ export const useCategories = () => {
   return useQuery<CategoryApiResponse, Error>({
     queryKey: ["categories"],
     queryFn: fetchCategories,
-    staleTime: 60 * 60 * 1000, // 카테고리는 자주 변경되지 않으므로 1시간
+    staleTime: 60 * 60 * 1000, // 1시간마다 데이터 갱신
   });
 };

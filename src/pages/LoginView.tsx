@@ -11,6 +11,7 @@ import TermsOfServiceModal from "@/components/TermsOfServiceModal";
 import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useGoogleLogin } from "@/hooks/queries/auth";
+import { authenticateWithGoogle } from "@/api/auth/googleAuth";
 
 export const LoginView = () => {
   const navigate = useNavigate();
@@ -25,24 +26,30 @@ export const LoginView = () => {
     onSuccess: async (response) => {
       setIsLoading(true);
       try {
-        const user = await fetchGoogleUserInfo(response.access_token);
+        // 1. Google에서 유저 정보 가져오기
+        const googleUser = await fetchGoogleUserInfo(response.access_token);
+
+        // 2. Lambda 함수로 인증 처리
+        const authResult = await authenticateWithGoogle(response.access_token);
 
         // 프로필 이미지 URL 수정
-        const pictureUrl = user.picture?.replace("=s96-c", "");
+        const pictureUrl = googleUser.picture?.replace("=s96-c", "");
 
         useAuthStore.getState().setUser({
-          email: user.email,
-          name: user.name,
+          email: googleUser.email,
+          name: googleUser.name,
           picture:
             pictureUrl ||
-            "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name),
+            "https://ui-avatars.com/api/?name=" +
+              encodeURIComponent(googleUser.name),
         });
 
-        localStorage.setItem("token", response.access_token);
+        // Lambda에서 받은 JWT 토큰 저장
+        localStorage.setItem("token", authResult.accessToken);
 
         toast({
-          title: "로그인 성공!",
-          description: `환영합니다, ${user.name}님`,
+          title: authResult.isNewUser ? "회원가입 성공!" : "로그인 성공!",
+          description: `환영합니다, ${googleUser.name}님`,
         });
 
         navigate("/");

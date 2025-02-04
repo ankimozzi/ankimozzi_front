@@ -11,7 +11,7 @@ export interface CategoryApiResponse extends BaseApiResponse {
 
 // 덱 API 응답 타입
 export interface DeckApiResponse extends BaseApiResponse {
-  body: string; // JSON.parse 후: { deck_name: string, cards: Card[] }
+  body: string;
 }
 
 // 덱 목록 API 응답 타입
@@ -21,5 +21,7 @@ export interface DeckListApiResponse extends BaseApiResponse {
 
 // 덱 상태 API 응답 타입
 export interface DeckStatusApiResponse extends BaseApiResponse {
-  body: string; // JSON.parse 후: { status: string }
+  status: string;
+  message: string;
+  data: string;
 }
