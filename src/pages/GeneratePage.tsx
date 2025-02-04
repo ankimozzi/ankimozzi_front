@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { generateUploadURL, checkDeckStatus } from "../api/api";
 import { Upload, X, FileIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,17 +21,21 @@ import {
 import loading1 from "../assets/loading_1.svg";
 import loading2 from "../assets/loading_2.svg";
 import loading3 from "../assets/loading_3.svg";
+import { useUploadUrl, useDeckStatus } from "@/hooks/queries/services";
 
 const GeneratePage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [deckName, setDeckName] = useState<string>("");
-  const [polling, setPolling] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [imageIndex, setImageIndex] = useState<number>(0);
   const navigate = useNavigate();
 
   const images = [loading1, loading2, loading3];
+
+  // React Query 훅 사용
+  const { mutateAsync: generateUploadURL } = useUploadUrl();
+  const { data: deckStatus, isLoading: isPolling } = useDeckStatus(deckName);
 
   useEffect(() => {
     let imageInterval: NodeJS.Timeout;
@@ -43,6 +46,20 @@ const GeneratePage = () => {
     }
     return () => clearInterval(imageInterval);
   }, [isModalOpen, isError]);
+
+  useEffect(() => {
+    if (deckStatus?.body) {
+      const status = JSON.parse(deckStatus.body).status;
+      if (status === "complete") {
+        setIsModalOpen(false);
+        navigate(`/flashcards/${deckName}`, {
+          state: {
+            deckResponse: deckStatus,
+          },
+        });
+      }
+    }
+  }, [deckStatus, deckName, navigate]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -75,32 +92,6 @@ const GeneratePage = () => {
     setIsError(false);
   };
 
-  const pollForDeckCompletion = async (deckName: string) => {
-    let attempts = 0;
-    const maxAttempts = 100;
-
-    while (attempts < maxAttempts) {
-      try {
-        const response = await checkDeckStatus(deckName);
-        console.log(`Polling attempt ${attempts}`, response);
-
-        if (response && response.status === "complete") {
-          return response;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        attempts++;
-      } catch (error) {
-        console.error("Error polling for deck completion:", error);
-        break;
-      }
-    }
-
-    throw new Error(
-      "Failed to retrieve completed deck after multiple attempts"
-    );
-  };
-
   const handleGenerate = async () => {
     if (!file || !deckName.trim()) {
       alert("Please upload a file and enter a deck name.");
@@ -114,7 +105,6 @@ const GeneratePage = () => {
       const uploadUrl = await generateUploadURL({
         fileName: `${deckName}.mp4`,
       });
-      console.log("Upload URL:", uploadUrl);
 
       await fetch(uploadUrl, {
         method: "PUT",
@@ -123,21 +113,8 @@ const GeneratePage = () => {
           "Content-Type": file.type,
         },
       });
-
-      setPolling(true);
-
-      const deckResponse = await pollForDeckCompletion(deckName);
-      setPolling(false);
-
-      setIsModalOpen(false);
-      navigate(`/flashcards/${deckName}`, {
-        state: {
-          deckResponse,
-        },
-      });
     } catch (error) {
-      console.error("Error during file upload or deck generation:", error);
-      setPolling(false);
+      console.error("Error during file upload:", error);
       setIsError(true);
     }
   };
@@ -160,7 +137,7 @@ const GeneratePage = () => {
               rounded-lg border-2 border-dashed
               p-4 sm:p-8 text-center transition-all cursor-pointer
               ${!file ? "hover:border-primary" : ""}
-              ${polling ? "bg-muted" : ""}
+              ${isPolling ? "bg-muted" : ""}
             `}
             onClick={() =>
               !file && document.getElementById("file-upload")?.click()
@@ -230,10 +207,10 @@ const GeneratePage = () => {
             <div className="flex justify-end pt-2">
               <Button
                 onClick={handleGenerate}
-                disabled={!file || !deckName.trim() || polling}
+                disabled={!file || !deckName.trim() || isPolling}
                 className="w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10"
               >
-                {polling ? "Generating..." : "Generate"}
+                {isPolling ? "Generating..." : "Generate"}
               </Button>
             </div>
           </div>

@@ -5,7 +5,7 @@ import DeckListView from "./pages/DeckListView.tsx";
 import Home from "./pages/Home.tsx";
 import Header from "./components/Header.tsx";
 import { Toaster } from "@/components/ui/toaster";
-import LoginView from "./pages/LoginView.tsx";
+import { LoginView } from "./pages/LoginView.tsx";
 import SignupView from "./pages/SignupView.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import ProfileView from "./pages/ProfileView.tsx";
