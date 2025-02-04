@@ -92,8 +92,11 @@ const DeckListView = () => {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
-      {isLoading && <Loading isComplete={false} />}
-      <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
+      <div className="container mx-auto px-4 py-6 
+        sm:px-6 sm:py-8 
+        lg:max-w-5xl
+        xl:max-w-6xl">
+        {isLoading && <Loading isComplete={false} />}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
