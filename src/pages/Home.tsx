@@ -165,19 +165,19 @@ const Home = () => {
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <TeamMember
-              name="김기훈"
+              name="Kihoon Kim"
               role="Backend Engineer"
               description="Developed scalable video processing pipelines and performed cost calculations."
               linkedIn="kihoon-noah-kim"
             />
             <TeamMember
-              name="김동연"
+              name="Dongyeon Kim"
               role="Full-stack Engineer"
               description="Implemented frontend development, video storage, and quiz conversion workflows, and designed the architecture."
               linkedIn="yeonnnn"
             />
             <TeamMember
-              name="나덕룡 (Nathan)"
+              name="Nathan Na"
               role="Front Engineer, Market Research Analyst"
               description="Worked on frontend development, market research, business strategy planning, and cost calculations."
               linkedIn="deokryongna"
