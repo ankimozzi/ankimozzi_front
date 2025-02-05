@@ -4,6 +4,7 @@ import Loading from "../components/Loading";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PlusCircle } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import {
   useCategories,
   useDeckList,
@@ -91,90 +92,107 @@ const DeckListView = () => {
   const isLoading = isCategoriesLoading || isDeckListLoading;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
-      <div className="container mx-auto px-4 py-6 
-        sm:px-6 sm:py-8 
-        lg:max-w-5xl
-        xl:max-w-6xl">
-        {isLoading && <Loading isComplete={false} />}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Video Flashcards
-            </h1>
-            <p className="mt-1 text-sm sm:text-base text-gray-500">
-              Select a category to view flashcards
-            </p>
+    <>
+      <Helmet>
+        <title>Duel | Decks</title>
+        <meta
+          name="description"
+          content="Browse and view flashcards by category on Duel. Select a category to explore detailed videos and associated flashcards."
+        />
+        <meta property="og:title" content="Duel | Decks" />
+        <meta
+          property="og:description"
+          content="Browse and view flashcards by category on Duel. Select a category to explore detailed videos and associated flashcards."
+        />
+        <link rel="canonical" href="https://duel.work/decks" />
+      </Helmet>
+      <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
+        <div
+          className="container mx-auto px-4 py-6 
+          sm:px-6 sm:py-8 
+          lg:max-w-5xl
+          xl:max-w-6xl"
+        >
+          {isLoading && <Loading isComplete={false} />}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Video Flashcards
+              </h1>
+              <p className="mt-1 text-sm sm:text-base text-gray-500">
+                Select a category to view flashcards
+              </p>
+            </div>
+            <Button
+              onClick={() => navigate("/generate")}
+              className="w-full sm:w-auto h-10 text-sm sm:text-base"
+            >
+              <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              Generate
+            </Button>
           </div>
-          <Button
-            onClick={() => navigate("/generate")}
-            className="w-full sm:w-auto h-10 text-sm sm:text-base"
-          >
-            <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            Generate
-          </Button>
-        </div>
 
-        <ScrollArea className="w-full whitespace-nowrap rounded-lg border bg-white p-4 mb-6">
-          <div className="flex space-x-4">
-            {categories.map((category: string, index: number) => (
-              <Button
-                key={index}
-                variant={selectedCategory === category ? "default" : "ghost"}
-                className={`flex-shrink-0 h-9 sm:h-10 px-4 sm:px-6 text-sm sm:text-base
-                  ${
-                    selectedCategory === category
-                      ? "bg-primary text-primary-foreground"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                onClick={() => handleCategoryClick(category)}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-
-        <div className="space-y-6">
-          {!isLoading &&
-            (deckList.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {deckList.map((deck: Deck, index: number) => (
-                  <button
-                    key={index}
-                    className="w-full text-left bg-white rounded-xl p-6 shadow-sm hover:shadow-md
-                      border border-gray-100 transition-all duration-200"
-                    onClick={() => handleDeckClick(deck)}
-                  >
-                    <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">
-                      {deck.question
-                        .replace("transcribe-", "")
-                        .replace(".mp4", "")}
-                    </h3>
-                    <p className="mt-2 text-sm text-gray-500">
-                      Click to view flashcards
-                    </p>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-base sm:text-lg text-gray-500">
-                  No decks available in this category
-                </p>
+          <ScrollArea className="w-full whitespace-nowrap rounded-lg border bg-white p-4 mb-6">
+            <div className="flex space-x-4">
+              {categories.map((category: string, index: number) => (
                 <Button
-                  onClick={() => navigate("/generate")}
-                  variant="outline"
-                  className="mt-4"
+                  key={index}
+                  variant={selectedCategory === category ? "default" : "ghost"}
+                  className={`flex-shrink-0 h-9 sm:h-10 px-4 sm:px-6 text-sm sm:text-base
+                    ${
+                      selectedCategory === category
+                        ? "bg-primary text-primary-foreground"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  onClick={() => handleCategoryClick(category)}
                 >
-                  Create your first deck
+                  {category}
                 </Button>
-              </div>
-            ))}
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          <div className="space-y-6">
+            {!isLoading &&
+              (deckList.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {deckList.map((deck: Deck, index: number) => (
+                    <button
+                      key={index}
+                      className="w-full text-left bg-white rounded-xl p-6 shadow-sm hover:shadow-md
+                      border border-gray-100 transition-all duration-200"
+                      onClick={() => handleDeckClick(deck)}
+                    >
+                      <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">
+                        {deck.question
+                          .replace("transcribe-", "")
+                          .replace(".mp4", "")}
+                      </h3>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Click to view flashcards
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-base sm:text-lg text-gray-500">
+                    No decks available in this category
+                  </p>
+                  <Button
+                    onClick={() => navigate("/generate")}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    Create your first deck
+                  </Button>
+                </div>
+              ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
