@@ -13,16 +13,16 @@ const ProfileView = () => {
   const { mutate: handleLogout, isPending } = useLogout({
     onSuccess: () => {
       toast({
-        title: "로그아웃 성공",
-        description: "안전하게 로그아웃되었습니다.",
+        title: "Logout Successful",
+        description: "You have been logged out successfully.",
       });
       navigate("/login");
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "로그아웃 실패",
-        description: "로그아웃 중 문제가 발생했습니다. 다시 시도해주세요.",
+        title: "Logout Failed",
+        description: "A problem occurred during logout. Please try again.",
       });
     },
   });
@@ -71,27 +71,27 @@ const ProfileView = () => {
             <div className="w-full max-w-md space-y-6">
               <div className="border rounded-lg p-6 space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  계정 정보
+                  Account Information
                 </h2>
                 <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium text-gray-500">
-                      이름
+                      Name
                     </label>
                     <p className="mt-1 text-gray-900">{user.name}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">
-                      이메일
+                      Email
                     </label>
                     <p className="mt-1 text-gray-900">{user.email}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">
-                      가입일
+                      Joined Date
                     </label>
                     <p className="mt-1 text-gray-900">
-                      {new Date().toLocaleDateString("ko-KR", {
+                      {new Date().toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -108,7 +108,7 @@ const ProfileView = () => {
                   className="w-full"
                   onClick={() => navigate("/decks")}
                 >
-                  내 덱 관리
+                  Manage My Decks
                 </Button>
                 <Button
                   variant="destructive"
@@ -116,7 +116,7 @@ const ProfileView = () => {
                   onClick={() => handleLogout()}
                   disabled={isPending}
                 >
-                  {isPending ? "로그아웃 중..." : "로그아웃"}
+                  {isPending ? "Logging out..." : "Logout"}
                 </Button>
               </div>
             </div>

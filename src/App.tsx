@@ -26,14 +26,7 @@ const App = () => {
               <main className="flex-grow" role="main">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route
-                    path="/generate"
-                    element={
-                      <ProtectedRoute>
-                        <GeneratePage />
-                      </ProtectedRoute>
-                    }
-                  />
+                  <Route path="/generate" element={<GeneratePage />} />
                   <Route path="/decks" element={<DeckListView />} />
                   <Route
                     path="/flashcards/:deckId"

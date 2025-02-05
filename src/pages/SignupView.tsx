@@ -36,21 +36,21 @@ const SignupView = () => {
       );
 
       toast({
-        title: "회원가입 성공!",
-        description: `환영합니다, ${userInfo.name}님`,
+        title: "Sign Up Successful!",
+        description: `Welcome, ${userInfo.name}!`,
       });
 
       navigate("/");
     },
     onError: (error) => {
-      if (error.message === "이미 가입된 이메일입니다.") {
+      if (error.message === "Email is already registered.") {
         navigate("/login");
       }
       toast({
         variant: "destructive",
-        title: "회원가입 실패",
+        title: "Sign Up Failed",
         description:
-          error.message || "구글 회원가입에 실패했습니다. 다시 시도해주세요.",
+          error.message || "Google sign up failed. Please try again.",
       });
     },
   });
@@ -69,10 +69,10 @@ const SignupView = () => {
       >
         <div className="text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            회원가입
+            Sign Up
           </h2>
           <p className="mt-2 text-sm sm:text-base text-gray-500">
-            Ankimozzi에 오신 것을 환영합니다
+            Welcome to Duel
           </p>
         </div>
 
@@ -87,36 +87,36 @@ const SignupView = () => {
               icon={faGoogleBrand as any}
               className="mr-2 h-3 w-3 sm:h-4 sm:w-4"
             />
-            {isPending ? "처리 중..." : "Google로 회원가입"}
+            {isPending ? "Processing..." : "Sign Up with Google"}
           </Button>
 
           <div className="text-center text-xs sm:text-sm text-gray-500">
-            이미 계정이 있으신가요?{" "}
+            Already have an account?{" "}
             <button
               onClick={() => navigate("/login")}
               className="text-blue-600 hover:underline focus:outline-none"
             >
-              로그인하기
+              Login
             </button>
           </div>
         </div>
 
         <div className="mt-6 sm:mt-8 text-center text-xs text-gray-400">
-          로그인 시{" "}
+          By signing up, you agree to our{" "}
           <button
             onClick={() => setShowTerms(true)}
             className="text-blue-600 hover:underline"
           >
-            이용약관
-          </button>
-          과{" "}
+            Terms of Service
+          </button>{" "}
+          and{" "}
           <button
             onClick={() => setShowPrivacyPolicy(true)}
             className="text-blue-600 hover:underline"
           >
-            개인정보처리방침
+            Privacy Policy
           </button>
-          에 동의하게 됩니다
+          .
         </div>
       </motion.div>
 
