@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Document, Paragraph, Packer } from 'docx';
-import { useLoadingStore } from '@/store/useLoadingStore';
-import Loading from '@/components/Loading';
+import { Document, Paragraph, Packer } from "docx";
+import Loading from "@/components/Loading";
+import { useDeck } from "@/hooks/queries/services";
+import { Helmet } from "react-helmet-async";
 
 interface Flashcard {
   id: number;
@@ -33,7 +34,6 @@ interface LocationState {
 const FlashcardView = () => {
   const { deckId } = useParams<{ deckId: string }>();
   const location = useLocation();
-
   const { deckResponse } = (location.state as LocationState) || {};
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const { toast } = useToast();
@@ -41,43 +41,35 @@ const FlashcardView = () => {
     {}
   );
 
-  const { isLoading, isComplete, message } = useLoadingStore();
-  const { startLoading, completeLoading } = useLoadingStore();
+  const { data: deckData, isLoading } = useDeck(deckId || "");
 
   useEffect(() => {
-    const fetchData = async () => {
-      startLoading('Loading flashcards...');
-      try {
-        console.log("Deck Response:", deckResponse);
-        if (deckResponse?.data) {
-          const parsedFlashcards = deckResponse.data
-            .split("\n")
-            .filter((line: string) => line.trim())
-            .map((line: string, index: number) => {
-              const [answer, question] = line
-                .split("\t")
-                .map((part: string) => part.trim());
-              return {
-                id: index,
-                question: question || "No question provided",
-                answer: answer || "No answer provided",
-              };
-            });
+    try {
+      const data = deckResponse?.data || deckData?.body;
 
-          setFlashcards(parsedFlashcards);
-          completeLoading();
-        } else {
-          console.warn("No deck data available.");
-          completeLoading();
-        }
-      } catch (error) {
-        console.error("Error parsing flashcards:", error);
-        completeLoading();
+      if (data) {
+        const parsedFlashcards = data
+          .split("\n")
+          .filter((line: string) => line.trim())
+          .map((line: string, index: number) => {
+            const [answer, question] = line
+              .split("\t")
+              .map((part: string) => part.trim());
+            return {
+              id: index,
+              question: question || "No question provided",
+              answer: answer || "No answer provided",
+            };
+          });
+
+        setFlashcards(parsedFlashcards);
+      } else {
+        console.warn("No deck data available.");
       }
-    };
-
-    fetchData();
-  }, [deckResponse]);
+    } catch (error) {
+      console.error("Error parsing flashcards:", error);
+    }
+  }, [deckResponse, deckData]);
 
   const handleCopyAllJSON = () => {
     if (deckResponse?.data) {
@@ -100,24 +92,26 @@ const FlashcardView = () => {
   const handleDownloadWord = async () => {
     if (flashcards.length > 0) {
       const doc = new Document({
-        sections: [{
-          properties: {},
-          children: flashcards.flatMap(card => [
-            new Paragraph({ text: `Question: ${card.question}` }),
-            new Paragraph({ text: `Answer: ${card.answer}` }),
-            new Paragraph({ text: '' })  // 빈 줄 추가
-          ])
-        }]
+        sections: [
+          {
+            properties: {},
+            children: flashcards.flatMap((card) => [
+              new Paragraph({ text: `Question: ${card.question}` }),
+              new Paragraph({ text: `Answer: ${card.answer}` }),
+              new Paragraph({ text: "" }), // 빈 줄 추가
+            ]),
+          },
+        ],
       });
 
       const blob = await Packer.toBlob(doc);
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `${deckId}_flashcards.docx`;
       link.click();
       URL.revokeObjectURL(url);
-      
+
       toast({
         variant: "default",
         title: "Downloaded! 📥",
@@ -141,109 +135,129 @@ const FlashcardView = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 sm:px-6 space-y-8">
-      {isLoading && <Loading isComplete={isComplete} message={message} />}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 max-w-3xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Flashcards for {deckId}
-        </h1>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            onClick={handleCopyAllJSON}
-            className="flex items-center gap-2 flex-1 sm:flex-initial justify-center"
-          >
-            <FontAwesomeIcon icon={faClipboard} />
-            Copy All
-          </Button>
-          <Button
-            onClick={handleDownloadWord}
-            disabled={flashcards.length === 0}
-            className="flex items-center gap-2 flex-1 sm:flex-initial justify-center"
-          >
-            <FontAwesomeIcon icon={faDownload} />
-            Word
-          </Button>
+    <>
+      <Helmet>
+        <title>Duel | {deckId}</title>
+        <meta name="description" content={`View flashcards for ${deckId}`} />
+        <meta property="og:title" content={`Duel | ${deckId}`} />
+        <meta
+          property="og:description"
+          content={`View flashcards for ${deckId}`}
+        />
+        <link rel="canonical" href={`https://duel.work/flashcards/${deckId}`} />
+      </Helmet>
+      <div className="container mx-auto py-8 px-4 sm:px-6 space-y-8">
+        {isLoading && <Loading isComplete={false} />}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 max-w-3xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Flashcards for {deckId}
+          </h1>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={handleCopyAllJSON}
+              className="flex items-center gap-2 flex-1 sm:flex-initial justify-center"
+            >
+              <FontAwesomeIcon icon={faClipboard} />
+              Copy All
+            </Button>
+            <Button
+              onClick={handleDownloadWord}
+              disabled={flashcards.length === 0}
+              className="flex items-center gap-2 flex-1 sm:flex-initial justify-center"
+            >
+              <FontAwesomeIcon icon={faDownload} />
+              Word
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-1">
-        <p className="text-sm text-muted-foreground flex items-center gap-2">
-          <FontAwesomeIcon icon={faInfoCircle} className="h-4 w-4" />
-          Click cards to reveal answers
-        </p>
-      </div>
+        <div className="max-w-3xl mx-auto px-1">
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <FontAwesomeIcon icon={faInfoCircle} className="h-4 w-4" />
+            Click cards to reveal answers
+          </p>
+        </div>
 
-      <div className="grid gap-4 max-w-3xl mx-auto">
-        {flashcards.length > 0 ? (
-          flashcards.map((card, index) => (
-            <Card 
-              key={card.id}
-              className="cursor-pointer overflow-hidden transition-all duration-200
+        <div className="grid gap-4 max-w-3xl mx-auto">
+          {flashcards.length > 0 ? (
+            flashcards.map((card, index) => (
+              <Card
+                key={card.id}
+                className="cursor-pointer overflow-hidden transition-all duration-200
                 shadow-md hover:shadow-lg bg-gradient-to-br from-white to-gray-50
                 dark:from-gray-900 dark:to-gray-800
                 border-2 hover:border-gray-300 dark:hover:border-gray-600
                 transform hover:-translate-y-0.5"
-              onClick={() => handleFlipCard(card.id)}
-            >
-              <CardContent className="p-4 sm:p-6 relative min-h-[120px]">
-                {/* Question */}
-                <div
-                  className={`w-full transition-all duration-300 ease-in-out transform ${
-                    flippedCards[card.id] 
-                      ? 'opacity-0 translate-y-4' 
-                      : 'opacity-100 translate-y-0'
-                  }`}
-                >
-                  <div className="flex items-start">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full 
+                onClick={() => handleFlipCard(card.id)}
+              >
+                <CardContent className="p-4 sm:p-6 relative min-h-[120px]">
+                  {/* Question */}
+                  <div
+                    className={`w-full transition-all duration-300 ease-in-out transform ${
+                      flippedCards[card.id]
+                        ? "opacity-0 translate-y-4"
+                        : "opacity-100 translate-y-0"
+                    }`}
+                  >
+                    <div className="flex items-start">
+                      <div
+                        className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full 
                       bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm font-semibold mr-2 sm:mr-3 
-                      text-gray-600 dark:text-gray-300 shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-muted-foreground mb-1 sm:mb-2">
-                        Question
-                      </p>
-                      <p className="text-sm sm:text-base leading-relaxed">{card.question}</p>
+                      text-gray-600 dark:text-gray-300 shrink-0"
+                      >
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm text-muted-foreground mb-1 sm:mb-2">
+                          Question
+                        </p>
+                        <p className="text-sm sm:text-base leading-relaxed">
+                          {card.question}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Answer */}
-                <div
-                  className={`w-full absolute top-0 left-0 p-4 sm:p-6 transition-all duration-300 ease-in-out transform ${
-                    flippedCards[card.id] 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 -translate-y-4'
-                  }`}
-                >
-                  <div className="flex items-start">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full 
+                  {/* Answer */}
+                  <div
+                    className={`w-full absolute top-0 left-0 p-4 sm:p-6 transition-all duration-300 ease-in-out transform ${
+                      flippedCards[card.id]
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 -translate-y-4"
+                    }`}
+                  >
+                    <div className="flex items-start">
+                      <div
+                        className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full 
                       bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm font-semibold mr-2 sm:mr-3 
-                      text-gray-600 dark:text-gray-300 shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-muted-foreground mb-1 sm:mb-2">
-                        Answer
-                      </p>
-                      <p className="text-sm sm:text-base leading-relaxed">{card.answer}</p>
+                      text-gray-600 dark:text-gray-300 shrink-0"
+                      >
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm text-muted-foreground mb-1 sm:mb-2">
+                          Answer
+                        </p>
+                        <p className="text-sm sm:text-base leading-relaxed">
+                          {card.answer}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <div className="space-y-4">
-            <Skeleton className="h-[120px] w-full rounded-lg" />
-            <Skeleton className="h-[120px] w-full rounded-lg" />
-            <Skeleton className="h-[120px] w-full rounded-lg" />
-          </div>
-        )}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="space-y-4">
+              <Skeleton className="h-[120px] w-full rounded-lg" />
+              <Skeleton className="h-[120px] w-full rounded-lg" />
+              <Skeleton className="h-[120px] w-full rounded-lg" />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
